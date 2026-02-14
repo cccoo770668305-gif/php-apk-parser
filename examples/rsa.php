@@ -1,7 +1,7 @@
 <?php
 
-$cert_path = 'extract_folder/META-INF/CERT.RSA';
-$cert = file_get_contents('extract_folder/META-INF/CERT.RSA');
+$cert_path = __DIR__ . '/extract_folder/META-INF/CERT.RSA';
+$cert = file_get_contents(__DIR__ . '/extract_folder/META-INF/CERT.RSA');
 
 $beginpem = "-----BEGIN CERTIFICATE-----\n";
 $endpem = "-----END CERTIFICATE-----\n";
