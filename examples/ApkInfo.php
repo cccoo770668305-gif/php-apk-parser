@@ -10,7 +10,7 @@
  */
 
 include 'autoload.php';
-$apk = new \ApkParser\Parser('EBHS.apk');
+$apk = new \ApkParser\Parser(__DIR__ . '/EBHS.apk');
 
 $manifest = $apk->getManifest();
 $permissions = $manifest->getPermissions();
