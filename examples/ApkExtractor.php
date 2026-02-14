@@ -10,7 +10,7 @@
 
 include 'autoload.php';
 
-$apk = new \ApkParser\Parser('EBHS.apk');
+$apk = new \ApkParser\Parser(__DIR__ . '/EBHS.apk');
 $extractFolder = 'extract_folder';
 
 if (is_dir($extractFolder) || mkdir($extractFolder)) {

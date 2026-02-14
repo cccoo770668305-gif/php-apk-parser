@@ -104,12 +104,12 @@ class XmlParser
 
             switch ($chunkType) {
                 case self::RES_STRING_POOL_TYPE:
-                $numbStrings = $this->littleEndianWord($this->bytes, $off + 8);
-                $flags = $this->littleEndianWord($this->bytes, $off + 8 * 2);
-                $this->isUTF8 = ($flags & self::UTF8_FLAG) != 0;
-                $sitOff = $off + $chunkHeaderSize;
-                $stOff = $sitOff + $numbStrings * 4;
-                break;
+                    $numbStrings = $this->littleEndianWord($this->bytes, $off + 8);
+                    $flags = $this->littleEndianWord($this->bytes, $off + 8 * 2);
+                    $this->isUTF8 = ($flags & self::UTF8_FLAG) != 0;
+                    $sitOff = $off + $chunkHeaderSize;
+                    $stOff = $sitOff + $numbStrings * 4;
+                    break;
                 case  self::RES_XML_RESOURCE_MAP_TYPE:
                     $resIdsOffset = $off + $chunkHeaderSize;
                     $resIdsCount = ($chunkSize - $chunkHeaderSize) / 4;
