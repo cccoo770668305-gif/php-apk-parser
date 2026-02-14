@@ -10,7 +10,7 @@
  */
 
 include 'autoload.php';
-$apk = new \ApkParser\Parser('EBHS.apk');
+$apk = new \ApkParser\Parser(__DIR__ . '/EBHS.apk');
 
 $manifest = $apk->getManifest();
 $permissions = $manifest->getPermissions();
@@ -19,9 +19,9 @@ echo '<pre>';
 echo "Package Name      : " . $manifest->getPackageName() . "" . PHP_EOL;
 echo "Version           : " . $manifest->getVersionName() . " (" . $manifest->getVersionCode() . ")" . PHP_EOL;
 echo "Min Sdk Level     : " . $manifest->getMinSdkLevel() . "" . PHP_EOL;
-echo "Min Sdk Platform  : " . $manifest->getMinSdk()->platform . "" . PHP_EOL;
+echo "Min Sdk Platform  : " . ($manifest->getMinSdk() ? $manifest->getMinSdk()->platform : "Unknown") . "" . PHP_EOL;
 echo "Target Sdk Level     : " . $manifest->getTargetSdkLevel() . "" . PHP_EOL;
-echo "Target Sdk Platform  : " . $manifest->getTargetSdk()->platform . "" . PHP_EOL;
+echo "Target Sdk Platform  : " . ($manifest->getTargetSdk() ? $manifest->getTargetSdk()->platform : "Unknown") . "" . PHP_EOL;
 echo PHP_EOL;
 echo "------------- Permssions List -------------" . PHP_EOL;
 

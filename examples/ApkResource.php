@@ -10,13 +10,12 @@
  */
 
 include 'autoload.php';
-$apk = new \ApkParser\Parser('vitrinova.apk', ['manifest_only' => false]);
+$apk = new \ApkParser\Parser(__DIR__ . '/EBHS.apk', ['manifest_only' => false]);
 $resourceId = $apk->getManifest()->getApplication()->getIcon();
 $resources = $apk->getResources($resourceId);
 
 $labelResourceId = $apk->getManifest()->getApplication()->getLabel();
 $appLabel = $apk->getResources($labelResourceId);
-echo $appLabel[0];
 
 header('Content-type: text/html');
 echo $appLabel[0] . '<br/>';
