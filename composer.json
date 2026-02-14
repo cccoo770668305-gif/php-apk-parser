@@ -1,5 +1,5 @@
 {
-  "name": "tufanbarisyildirim/php-apk-parser",
+  "name": "evozi/apk-parser-php",
   "type": "library",
   "description": "Read basic info about an application from .apk file.",
   "keywords": [
