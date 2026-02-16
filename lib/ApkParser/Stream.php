@@ -125,13 +125,16 @@ class Stream
      */
     public function save($destination)
     {
-        $destination = new Stream(is_resource($destination) ? $destination : fopen($destination, 'w+'));
-        while (!$this->feof()) {
-            $destination->write($this->read());
+        $opened = false;
+        if (!is_resource($destination)) {
+            $destination = fopen($destination, 'w+');
+            $opened = true;
         }
 
-        if (!is_resource($destination)) { // close the file if we opened it otwhise dont touch.
-            $destination->close();
+        stream_copy_to_stream($this->stream, $destination);
+
+        if ($opened) {
+            fclose($destination);
         }
     }
 

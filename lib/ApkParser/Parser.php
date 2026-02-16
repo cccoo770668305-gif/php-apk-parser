@@ -120,7 +120,10 @@ class Parser
 
         // run shell command to extract  dalvik compiled codes to the cache folder.
         // Template : java -jar dedexer.jar -d {destination_folder} {source_dex_file}
-        $command = "java -jar {$this->config->jar_path} -d {$cache_folder} {$dex_file}";
+        $jarPath = escapeshellarg($this->config->jar_path);
+        $cacheFolder = escapeshellarg($cache_folder);
+        $dexFile = escapeshellarg($dex_file);
+        $command = "java -jar {$jarPath} -d {$cacheFolder} {$dexFile}";
         $returns = shell_exec($command);
 
         if (!$returns) { //TODO : check if it not contains any error. $returns will always contain some output.
