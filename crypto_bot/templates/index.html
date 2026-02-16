@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Trading Bot Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body { background-color: #f8f9fa; padding-top: 50px; }
+        .card { margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .status-on { color: green; font-weight: bold; }
+        .status-off { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center mb-4">Crypto Trading Bot Dashboard</h1>
+
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-primary text-white">Bot Control</div>
+                    <div class="card-body text-center">
+                        <p>Status: <span id="bot-status" class="status-off">Stopped</span></p>
+                        <button id="start-btn" class="btn btn-success me-2">Start Bot</button>
+                        <button id="stop-btn" class="btn btn-danger">Stop Bot</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-success text-white">Balance</div>
+                    <div class="card-body" id="balance-info">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header bg-info text-white">Market Info</div>
+                    <div class="card-body">
+                        <p>Symbol: <span id="trade-symbol">BTC/USDT</span></p>
+                        <p>Last Signal: <span id="last-signal">None</span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header bg-dark text-white">Recent Trades</div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Type</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody id="trades-body">
+                                <!-- Trades will be inserted here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function updateDashboard() {
+            fetch('/status')
+                .then(response => response.json())
+                .then(data => {
+                    // Update Status
+                    const statusEl = document.getElementById('bot-status');
+                    statusEl.innerText = data.is_running ? 'Running' : 'Stopped';
+                    statusEl.className = data.is_running ? 'status-on' : 'status-off';
+
+                    // Update Balance
+                    const balanceEl = document.getElementById('balance-info');
+                    balanceEl.innerHTML = '';
+                    for (const [coin, amount] of Object.entries(data.balance)) {
+                        balanceEl.innerHTML += `<p>${coin}: ${amount}</p>`;
+                    }
+                    if (Object.keys(data.balance).length === 0) {
+                        balanceEl.innerHTML = '<p>No balance found</p>';
+                    }
+
+                    // Update Market Info
+                    document.getElementById('trade-symbol').innerText = data.symbol;
+                    document.getElementById('last-signal').innerText = data.last_signal || 'None';
+
+                    // Update Trades
+                    const tradesBody = document.getElementById('trades-body');
+                    tradesBody.innerHTML = '';
+                    data.trades.reverse().forEach(trade => {
+                        const row = `<tr>
+                            <td>${trade.timestamp}</td>
+                            <td class="${trade.type === 'BUY' ? 'text-success' : 'text-danger'}">${trade.type}</td>
+                            <td>${trade.price}</td>
+                        </tr>`;
+                        tradesBody.innerHTML += row;
+                    });
+                });
+        }
+
+        document.getElementById('start-btn').addEventListener('click', () => {
+            fetch('/start', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    updateDashboard();
+                });
+        });
+
+        document.getElementById('stop-btn').addEventListener('click', () => {
+            fetch('/stop', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data.message);
+                    updateDashboard();
+                });
+        });
+
+        // Update every 5 seconds
+        setInterval(updateDashboard, 5000);
+        updateDashboard();
+    </script>
+</body>
+</html>
