@@ -51,13 +51,22 @@ class Stream
      */
     public function getByteArray($count = null)
     {
-        $bytes = array();
-
-        while (!$this->feof() && ($count === null || count($bytes) < $count)) {
-            $bytes[] = $this->readByte();
+        if ($count !== null && $count <= 0) {
+            return array();
         }
 
-        return $bytes;
+        /**
+         * Bolt: Optimized one-byte-at-a-time loop with stream_get_contents/fread and unpack.
+         * This is significantly faster for large streams and fixes a bug where a trailing
+         * null byte was added due to feof() behavior.
+         */
+        $content = $count === null ? stream_get_contents($this->stream) : fread($this->stream, $count);
+
+        if ($content === false || $content === '') {
+            return array();
+        }
+
+        return array_values(unpack('C*', $content));
     }
 
     /**
