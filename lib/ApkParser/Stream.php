@@ -51,13 +51,18 @@ class Stream
      */
     public function getByteArray($count = null)
     {
-        $bytes = array();
-
-        while (!$this->feof() && ($count === null || count($bytes) < $count)) {
-            $bytes[] = $this->readByte();
+        if ($count === 0) {
+            return [];
         }
 
-        return $bytes;
+        $data = $count === null ? stream_get_contents($this->stream) : fread($this->stream, $count);
+
+        if ($data === false || $data === '') {
+            return [];
+        }
+
+        // unpack returns a 1-indexed array, array_values makes it 0-indexed.
+        return array_values(unpack('C*', $data));
     }
 
     /**
@@ -116,13 +121,13 @@ class Stream
      */
     public function save($destination)
     {
-        $destination = new Stream(is_resource($destination) ? $destination : fopen($destination, 'w+'));
-        while (!$this->feof()) {
-            $destination->write($this->read());
-        }
+        $isResource = is_resource($destination);
+        $destStream = $isResource ? $destination : fopen($destination, 'w+');
 
-        if (!is_resource($destination)) { // close the file if we opened it otwhise dont touch.
-            $destination->close();
+        stream_copy_to_stream($this->stream, $destStream);
+
+        if (!$isResource) {
+            fclose($destStream);
         }
     }
 
