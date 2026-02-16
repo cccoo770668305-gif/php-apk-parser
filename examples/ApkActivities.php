@@ -11,7 +11,7 @@
 
 include 'autoload.php';
 
-$apk = new ApkParser\Parser('EBHS.apk');
+$apk = new ApkParser\Parser(__DIR__ . '/EBHS.apk');
 
 echo '<pre>';
 foreach ($apk->getManifest()->getApplication()->getActivityNameList() as $activityName) {
