@@ -118,20 +118,28 @@ class Stream
     }
 
     /**
-     * Write the stream to the given destionation directly without using extra memory like storing in an array etc.
+     * Write the stream to the given destination directly without using extra memory like storing in an array etc.
      *
-     * @param mixed $destination file path.
+     * @param mixed $destination file path or resource.
      * @throws \Exception
      */
     public function save($destination)
     {
-        $destination = new Stream(is_resource($destination) ? $destination : fopen($destination, 'w+'));
-        while (!$this->feof()) {
-            $destination->write($this->read());
+        $isResource = is_resource($destination);
+        $destStream = $isResource ? $destination : fopen($destination, 'w+');
+
+        if (!is_resource($destStream)) {
+            throw new \Exception("Invalid destination stream");
         }
 
-        if (!is_resource($destination)) { // close the file if we opened it otwhise dont touch.
-            $destination->close();
+        /**
+         * Bolt: Use stream_copy_to_stream for much faster copying than a byte-by-byte loop.
+         * This can be significantly faster for large files (like DEX files in an APK).
+         */
+        stream_copy_to_stream($this->stream, $destStream);
+
+        if (!$isResource) {
+            fclose($destStream);
         }
     }
 
