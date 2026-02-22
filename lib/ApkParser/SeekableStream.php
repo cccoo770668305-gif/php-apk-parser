@@ -47,25 +47,12 @@ class SeekableStream
      */
     private static function toMemoryStream($stream, $length = 0)
     {
-        $size = 0;
+        /**
+         * Bolt: Optimized stream-to-stream copy using stream_copy_to_stream.
+         * This is much more efficient than the manual 128-byte buffer loop.
+         */
         $memoryStream = \fopen('php://memory', 'wb+');
-
-        while (!\feof($stream)) {
-            $buf = \fread($stream, 128);
-            $bufSize = \strlen($buf);
-            $size += $bufSize;
-
-            if ($length > 0 && $size >= $length) {
-                $over = $size - $length;
-                \fputs($memoryStream, \substr($buf, 0, $bufSize - $over));
-
-                if ($over > 0) {
-                    \fseek($stream, -$over, SEEK_CUR);
-                }
-                break;
-            }
-            \fputs($memoryStream, $buf);
-        }
+        \stream_copy_to_stream($stream, $memoryStream, $length > 0 ? $length : -1);
         return $memoryStream;
     }
 
