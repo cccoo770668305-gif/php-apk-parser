@@ -43,6 +43,980 @@ class XmlParser
      */
     private $xmlObject = null;
 
+    /**
+     * These values are taken from the Android Manifest class.
+     */
+    private static $resourceMap = [
+        0x1010000 => 'theme',
+        0x1010001 => 'label',
+        0x1010002 => 'icon',
+        0x1010003 => 'name',
+        0x1010004 => 'manageSpaceActivity',
+        0x1010005 => 'allowClearUserData',
+        0x1010006 => 'permission',
+        0x1010007 => 'readPermission',
+        0x1010008 => 'writePermission',
+        0x1010009 => 'protectionLevel',
+        0x101000a => 'permissionGroup',
+        0x101000b => 'sharedUserId',
+        0x101000c => 'hasCode',
+        0x101000d => 'persistent',
+        0x101000e => 'enabled',
+        0x101000f => 'debuggable',
+        0x1010010 => 'exported',
+        0x1010011 => 'process',
+        0x1010012 => 'taskAffinity',
+        0x1010013 => 'multiprocess',
+        0x1010014 => 'finishOnTaskLaunch',
+        0x1010015 => 'clearTaskOnLaunch',
+        0x1010016 => 'stateNotNeeded',
+        0x1010017 => 'excludeFromRecents',
+        0x1010018 => 'authorities',
+        0x1010019 => 'syncable',
+        0x101001a => 'initOrder',
+        0x101001b => 'grantUriPermissions',
+        0x101001c => 'priority',
+        0x101001d => 'launchMode',
+        0x101001e => 'screenOrientation',
+        0x101001f => 'configChanges',
+        0x1010020 => 'description',
+        0x1010021 => 'targetPackage',
+        0x1010022 => 'handleProfiling',
+        0x1010023 => 'functionalTest',
+        0x1010024 => 'value',
+        0x1010025 => 'resource',
+        0x1010026 => 'mimeType',
+        0x1010027 => 'scheme',
+        0x1010028 => 'host',
+        0x1010029 => 'port',
+        0x101002a => 'path',
+        0x101002b => 'pathPrefix',
+        0x101002c => 'pathPattern',
+        0x101002d => 'action',
+        0x101002e => 'data',
+        0x101002f => 'targetClass',
+        0x1010030 => 'colorForeground',
+        0x1010031 => 'colorBackground',
+        0x1010032 => 'backgroundDimAmount',
+        0x1010033 => 'disabledAlpha',
+        0x1010034 => 'textAppearance',
+        0x1010035 => 'textAppearanceInverse',
+        0x1010036 => 'textColorPrimary',
+        0x1010037 => 'textColorPrimaryDisableOnly',
+        0x1010038 => 'textColorSecondary',
+        0x1010039 => 'textColorPrimaryInverse',
+        0x101003a => 'textColorSecondaryInverse',
+        0x101003b => 'textColorPrimaryNoDisable',
+        0x101003c => 'textColorSecondaryNoDisable',
+        0x101003d => 'textColorPrimaryInverseNoDisable',
+        0x101003e => 'textColorSecondaryInverseNoDisable',
+        0x101003f => 'textColorHintInverse',
+        0x1010040 => 'textAppearanceLarge',
+        0x1010041 => 'textAppearanceMedium',
+        0x1010042 => 'textAppearanceSmall',
+        0x1010043 => 'textAppearanceLargeInverse',
+        0x1010044 => 'textAppearanceMediumInverse',
+        0x1010045 => 'textAppearanceSmallInverse',
+        0x1010046 => 'textCheckMark',
+        0x1010047 => 'textCheckMarkInverse',
+        0x1010048 => 'buttonStyle',
+        0x1010049 => 'buttonStyleSmall',
+        0x101004a => 'buttonStyleInset',
+        0x101004b => 'buttonStyleToggle',
+        0x101004c => 'galleryItemBackground',
+        0x101004d => 'listPreferredItemHeight',
+        0x101004e => 'expandableListPreferredItemPaddingLeft',
+        0x101004f => 'expandableListPreferredChildPaddingLeft',
+        0x1010050 => 'expandableListPreferredItemIndicatorLeft',
+        0x1010051 => 'expandableListPreferredItemIndicatorRight',
+        0x1010052 => 'expandableListPreferredChildIndicatorLeft',
+        0x1010053 => 'expandableListPreferredChildIndicatorRight',
+        0x1010054 => 'windowBackground',
+        0x1010055 => 'windowFrame',
+        0x1010056 => 'windowNoTitle',
+        0x1010057 => 'windowIsFloating',
+        0x1010058 => 'windowIsTranslucent',
+        0x1010059 => 'windowContentOverlay',
+        0x101005a => 'windowTitleSize',
+        0x101005b => 'windowTitleStyle',
+        0x101005c => 'windowTitleBackgroundStyle',
+        0x101005d => 'alertDialogStyle',
+        0x101005e => 'panelBackground',
+        0x101005f => 'panelFullBackground',
+        0x1010060 => 'panelColorForeground',
+        0x1010061 => 'panelColorBackground',
+        0x1010062 => 'panelTextAppearance',
+        0x1010063 => 'scrollbarSize',
+        0x1010064 => 'scrollbarThumbHorizontal',
+        0x1010065 => 'scrollbarThumbVertical',
+        0x1010066 => 'scrollbarTrackHorizontal',
+        0x1010067 => 'scrollbarTrackVertical',
+        0x1010068 => 'scrollbarAlwaysDrawHorizontalTrack',
+        0x1010069 => 'scrollbarAlwaysDrawVerticalTrack',
+        0x101006a => 'absListViewStyle',
+        0x101006b => 'autoCompleteTextViewStyle',
+        0x101006c => 'checkboxStyle',
+        0x101006d => 'dropDownListViewStyle',
+        0x101006e => 'editTextStyle',
+        0x101006f => 'expandableListViewStyle',
+        0x1010070 => 'galleryStyle',
+        0x1010071 => 'gridViewStyle',
+        0x1010072 => 'imageButtonStyle',
+        0x1010073 => 'imageWellStyle',
+        0x1010074 => 'listViewStyle',
+        0x1010075 => 'listViewWhiteStyle',
+        0x1010076 => 'popupWindowStyle',
+        0x1010077 => 'progressBarStyle',
+        0x1010078 => 'progressBarStyleHorizontal',
+        0x1010079 => 'progressBarStyleSmall',
+        0x101007a => 'progressBarStyleLarge',
+        0x101007b => 'seekBarStyle',
+        0x101007c => 'ratingBarStyle',
+        0x101007d => 'ratingBarStyleSmall',
+        0x101007e => 'radioButtonStyle',
+        0x101007f => 'scrollbarStyle',
+        0x1010080 => 'scrollViewStyle',
+        0x1010081 => 'spinnerStyle',
+        0x1010082 => 'starStyle',
+        0x1010083 => 'tabWidgetStyle',
+        0x1010084 => 'textViewStyle',
+        0x1010085 => 'webViewStyle',
+        0x1010086 => 'dropDownItemStyle',
+        0x1010087 => 'spinnerDropDownItemStyle',
+        0x1010088 => 'dropDownHintAppearance',
+        0x1010089 => 'spinnerItemStyle',
+        0x101008a => 'mapViewStyle',
+        0x101008b => 'preferenceScreenStyle',
+        0x101008c => 'preferenceCategoryStyle',
+        0x101008d => 'preferenceInformationStyle',
+        0x101008e => 'preferenceStyle',
+        0x101008f => 'checkBoxPreferenceStyle',
+        0x1010090 => 'yesNoPreferenceStyle',
+        0x1010091 => 'dialogPreferenceStyle',
+        0x1010092 => 'editTextPreferenceStyle',
+        0x1010093 => 'ringtonePreferenceStyle',
+        0x1010094 => 'preferenceLayoutChild',
+        0x1010095 => 'textSize',
+        0x1010096 => 'typeface',
+        0x1010097 => 'textStyle',
+        0x1010098 => 'textColor',
+        0x1010099 => 'textColorHighlight',
+        0x101009a => 'textColorHint',
+        0x101009b => 'textColorLink',
+        0x101009c => 'state_focused',
+        0x101009d => 'state_window_focused',
+        0x101009e => 'state_enabled',
+        0x101009f => 'state_checkable',
+        0x10100a0 => 'state_checked',
+        0x10100a1 => 'state_selected',
+        0x10100a2 => 'state_active',
+        0x10100a3 => 'state_single',
+        0x10100a4 => 'state_first',
+        0x10100a5 => 'state_middle',
+        0x10100a6 => 'state_last',
+        0x10100a7 => 'state_pressed',
+        0x10100a8 => 'state_expanded',
+        0x10100a9 => 'state_empty',
+        0x10100aa => 'state_above_anchor',
+        0x10100ab => 'ellipsize',
+        0x10100ac => 'x',
+        0x10100ad => 'y',
+        0x10100ae => 'windowAnimationStyle',
+        0x10100af => 'gravity',
+        0x10100b0 => 'autoLink',
+        0x10100b1 => 'linksClickable',
+        0x10100b2 => 'entries',
+        0x10100b3 => 'layout_gravity',
+        0x10100b4 => 'windowEnterAnimation',
+        0x10100b5 => 'windowExitAnimation',
+        0x10100b6 => 'windowShowAnimation',
+        0x10100b7 => 'windowHideAnimation',
+        0x10100b8 => 'activityOpenEnterAnimation',
+        0x10100b9 => 'activityOpenExitAnimation',
+        0x10100ba => 'activityCloseEnterAnimation',
+        0x10100bb => 'activityCloseExitAnimation',
+        0x10100bc => 'taskOpenEnterAnimation',
+        0x10100bd => 'taskOpenExitAnimation',
+        0x10100be => 'taskCloseEnterAnimation',
+        0x10100bf => 'taskCloseExitAnimation',
+        0x10100c0 => 'taskToFrontEnterAnimation',
+        0x10100c1 => 'taskToFrontExitAnimation',
+        0x10100c2 => 'taskToBackEnterAnimation',
+        0x10100c3 => 'taskToBackExitAnimation',
+        0x10100c4 => 'orientation',
+        0x10100c5 => 'keycode',
+        0x10100c6 => 'fullDark',
+        0x10100c7 => 'topDark',
+        0x10100c8 => 'centerDark',
+        0x10100c9 => 'bottomDark',
+        0x10100ca => 'fullBright',
+        0x10100cb => 'topBright',
+        0x10100cc => 'centerBright',
+        0x10100cd => 'bottomBright',
+        0x10100ce => 'bottomMedium',
+        0x10100cf => 'centerMedium',
+        0x10100d0 => 'id',
+        0x10100d1 => 'tag',
+        0x10100d2 => 'scrollX',
+        0x10100d3 => 'scrollY',
+        0x10100d4 => 'background',
+        0x10100d5 => 'padding',
+        0x10100d6 => 'paddingLeft',
+        0x10100d7 => 'paddingTop',
+        0x10100d8 => 'paddingRight',
+        0x10100d9 => 'paddingBottom',
+        0x10100da => 'focusable',
+        0x10100db => 'focusableInTouchMode',
+        0x10100dc => 'visibility',
+        0x10100dd => 'fitsSystemWindows',
+        0x10100de => 'scrollbars',
+        0x10100df => 'fadingEdge',
+        0x10100e0 => 'fadingEdgeLength',
+        0x10100e1 => 'nextFocusLeft',
+        0x10100e2 => 'nextFocusRight',
+        0x10100e3 => 'nextFocusUp',
+        0x10100e4 => 'nextFocusDown',
+        0x10100e5 => 'clickable',
+        0x10100e6 => 'longClickable',
+        0x10100e7 => 'saveEnabled',
+        0x10100e8 => 'drawingCacheQuality',
+        0x10100e9 => 'duplicateParentState',
+        0x10100ea => 'clipChildren',
+        0x10100eb => 'clipToPadding',
+        0x10100ec => 'layoutAnimation',
+        0x10100ed => 'animationCache',
+        0x10100ee => 'persistentDrawingCache',
+        0x10100ef => 'alwaysDrawnWithCache',
+        0x10100f0 => 'addStatesFromChildren',
+        0x10100f1 => 'descendantFocusability',
+        0x10100f2 => 'layout',
+        0x10100f3 => 'inflatedId',
+        0x10100f4 => 'layout_width',
+        0x10100f5 => 'layout_height',
+        0x10100f6 => 'layout_margin',
+        0x10100f7 => 'layout_marginLeft',
+        0x10100f8 => 'layout_marginTop',
+        0x10100f9 => 'layout_marginRight',
+        0x10100fa => 'layout_marginBottom',
+        0x10100fb => 'listSelector',
+        0x10100fc => 'drawSelectorOnTop',
+        0x10100fd => 'stackFromBottom',
+        0x10100fe => 'scrollingCache',
+        0x10100ff => 'textFilterEnabled',
+        0x1010100 => 'transcriptMode',
+        0x1010101 => 'cacheColorHint',
+        0x1010102 => 'dial',
+        0x1010103 => 'hand_hour',
+        0x1010104 => 'hand_minute',
+        0x1010105 => 'format',
+        0x1010106 => 'checked',
+        0x1010107 => 'button',
+        0x1010108 => 'checkMark',
+        0x1010109 => 'foreground',
+        0x101010a => 'measureAllChildren',
+        0x101010b => 'groupIndicator',
+        0x101010c => 'childIndicator',
+        0x101010d => 'indicatorLeft',
+        0x101010e => 'indicatorRight',
+        0x101010f => 'childIndicatorLeft',
+        0x1010110 => 'childIndicatorRight',
+        0x1010111 => 'childDivider',
+        0x1010112 => 'animationDuration',
+        0x1010113 => 'spacing',
+        0x1010114 => 'horizontalSpacing',
+        0x1010115 => 'verticalSpacing',
+        0x1010116 => 'stretchMode',
+        0x1010117 => 'columnWidth',
+        0x1010118 => 'numColumns',
+        0x1010119 => 'src',
+        0x101011a => 'antialias',
+        0x101011b => 'filter',
+        0x101011c => 'dither',
+        0x101011d => 'scaleType',
+        0x101011e => 'adjustViewBounds',
+        0x101011f => 'maxWidth',
+        0x1010120 => 'maxHeight',
+        0x1010121 => 'tint',
+        0x1010122 => 'baselineAlignBottom',
+        0x1010123 => 'cropToPadding',
+        0x1010124 => 'textOn',
+        0x1010125 => 'textOff',
+        0x1010126 => 'baselineAligned',
+        0x1010127 => 'baselineAlignedChildIndex',
+        0x1010128 => 'weightSum',
+        0x1010129 => 'divider',
+        0x101012a => 'dividerHeight',
+        0x101012b => 'choiceMode',
+        0x101012c => 'itemTextAppearance',
+        0x101012d => 'horizontalDivider',
+        0x101012e => 'verticalDivider',
+        0x101012f => 'headerBackground',
+        0x1010130 => 'itemBackground',
+        0x1010131 => 'itemIconDisabledAlpha',
+        0x1010132 => 'rowHeight',
+        0x1010133 => 'maxRows',
+        0x1010134 => 'maxItemsPerRow',
+        0x1010135 => 'moreIcon',
+        0x1010136 => 'max',
+        0x1010137 => 'progress',
+        0x1010138 => 'secondaryProgress',
+        0x1010139 => 'indeterminate',
+        0x101013a => 'indeterminateOnly',
+        0x101013b => 'indeterminateDrawable',
+        0x101013c => 'progressDrawable',
+        0x101013d => 'indeterminateDuration',
+        0x101013e => 'indeterminateBehavior',
+        0x101013f => 'minWidth',
+        0x1010140 => 'minHeight',
+        0x1010141 => 'interpolator',
+        0x1010142 => 'thumb',
+        0x1010143 => 'thumbOffset',
+        0x1010144 => 'numStars',
+        0x1010145 => 'rating',
+        0x1010146 => 'stepSize',
+        0x1010147 => 'isIndicator',
+        0x1010148 => 'checkedButton',
+        0x1010149 => 'stretchColumns',
+        0x101014a => 'shrinkColumns',
+        0x101014b => 'collapseColumns',
+        0x101014c => 'layout_column',
+        0x101014d => 'layout_span',
+        0x101014e => 'bufferType',
+        0x101014f => 'text',
+        0x1010150 => 'hint',
+        0x1010151 => 'textScaleX',
+        0x1010152 => 'cursorVisible',
+        0x1010153 => 'maxLines',
+        0x1010154 => 'lines',
+        0x1010155 => 'height',
+        0x1010156 => 'minLines',
+        0x1010157 => 'maxEms',
+        0x1010158 => 'ems',
+        0x1010159 => 'width',
+        0x101015a => 'minEms',
+        0x101015b => 'scrollHorizontally',
+        0x101015c => 'field public static final deprecated int password',
+        0x101015d => 'field public static final deprecated int singleLine',
+        0x101015e => 'selectAllOnFocus',
+        0x101015f => 'includeFontPadding',
+        0x1010160 => 'maxLength',
+        0x1010161 => 'shadowColor',
+        0x1010162 => 'shadowDx',
+        0x1010163 => 'shadowDy',
+        0x1010164 => 'shadowRadius',
+        0x1010165 => 'field public static final deprecated int numeric',
+        0x1010166 => 'digits',
+        0x1010167 => 'field public static final deprecated int phoneNumber',
+        0x1010168 => 'field public static final deprecated int inputMethod',
+        0x1010169 => 'field public static final deprecated int capitalize',
+        0x101016a => 'field public static final deprecated int autoText',
+        0x101016b => 'field public static final deprecated int editable',
+        0x101016c => 'freezesText',
+        0x101016d => 'drawableTop',
+        0x101016e => 'drawableBottom',
+        0x101016f => 'drawableLeft',
+        0x1010170 => 'drawableRight',
+        0x1010171 => 'drawablePadding',
+        0x1010172 => 'completionHint',
+        0x1010173 => 'completionHintView',
+        0x1010174 => 'completionThreshold',
+        0x1010175 => 'dropDownSelector',
+        0x1010176 => 'popupBackground',
+        0x1010177 => 'inAnimation',
+        0x1010178 => 'outAnimation',
+        0x1010179 => 'flipInterval',
+        0x101017a => 'fillViewport',
+        0x101017b => 'prompt',
+        0x101017c => 'field public static final deprecated int startYear',
+        0x101017d => 'field public static final deprecated int endYear',
+        0x101017e => 'mode',
+        0x101017f => 'layout_x',
+        0x1010180 => 'layout_y',
+        0x1010181 => 'layout_weight',
+        0x1010182 => 'layout_toLeftOf',
+        0x1010183 => 'layout_toRightOf',
+        0x1010184 => 'layout_above',
+        0x1010185 => 'layout_below',
+        0x1010186 => 'layout_alignBaseline',
+        0x1010187 => 'layout_alignLeft',
+        0x1010188 => 'layout_alignTop',
+        0x1010189 => 'layout_alignRight',
+        0x101018a => 'layout_alignBottom',
+        0x101018b => 'layout_alignParentLeft',
+        0x101018c => 'layout_alignParentTop',
+        0x101018d => 'layout_alignParentRight',
+        0x101018e => 'layout_alignParentBottom',
+        0x101018f => 'layout_centerInParent',
+        0x1010190 => 'layout_centerHorizontal',
+        0x1010191 => 'layout_centerVertical',
+        0x1010192 => 'layout_alignWithParentIfMissing',
+        0x1010193 => 'layout_scale',
+        0x1010194 => 'visible',
+        0x1010195 => 'variablePadding',
+        0x1010196 => 'constantSize',
+        0x1010197 => 'oneshot',
+        0x1010198 => 'duration',
+        0x1010199 => 'drawable',
+        0x101019a => 'shape',
+        0x101019b => 'innerRadiusRatio',
+        0x101019c => 'thicknessRatio',
+        0x101019d => 'startColor',
+        0x101019e => 'endColor',
+        0x101019f => 'useLevel',
+        0x10101a0 => 'angle',
+        0x10101a1 => 'type',
+        0x10101a2 => 'centerX',
+        0x10101a3 => 'centerY',
+        0x10101a4 => 'gradientRadius',
+        0x10101a5 => 'color',
+        0x10101a6 => 'dashWidth',
+        0x10101a7 => 'dashGap',
+        0x10101a8 => 'radius',
+        0x10101a9 => 'topLeftRadius',
+        0x10101aa => 'topRightRadius',
+        0x10101ab => 'bottomLeftRadius',
+        0x10101ac => 'bottomRightRadius',
+        0x10101ad => 'left',
+        0x10101ae => 'top',
+        0x10101af => 'right',
+        0x10101b0 => 'bottom',
+        0x10101b1 => 'minLevel',
+        0x10101b2 => 'maxLevel',
+        0x10101b3 => 'fromDegrees',
+        0x10101b4 => 'toDegrees',
+        0x10101b5 => 'pivotX',
+        0x10101b6 => 'pivotY',
+        0x10101b7 => 'insetLeft',
+        0x10101b8 => 'insetRight',
+        0x10101b9 => 'insetTop',
+        0x10101ba => 'insetBottom',
+        0x10101bb => 'shareInterpolator',
+        0x10101bc => 'fillBefore',
+        0x10101bd => 'fillAfter',
+        0x10101be => 'startOffset',
+        0x10101bf => 'repeatCount',
+        0x10101c0 => 'repeatMode',
+        0x10101c1 => 'zAdjustment',
+        0x10101c2 => 'fromXScale',
+        0x10101c3 => 'toXScale',
+        0x10101c4 => 'fromYScale',
+        0x10101c5 => 'toYScale',
+        0x10101c6 => 'fromXDelta',
+        0x10101c7 => 'toXDelta',
+        0x10101c8 => 'fromYDelta',
+        0x10101c9 => 'toYDelta',
+        0x10101ca => 'fromAlpha',
+        0x10101cb => 'toAlpha',
+        0x10101cc => 'delay',
+        0x10101cd => 'animation',
+        0x10101ce => 'animationOrder',
+        0x10101cf => 'columnDelay',
+        0x10101d0 => 'rowDelay',
+        0x10101d1 => 'direction',
+        0x10101d2 => 'directionPriority',
+        0x10101d3 => 'factor',
+        0x10101d4 => 'cycles',
+        0x10101d5 => 'searchMode',
+        0x10101d6 => 'searchSuggestAuthority',
+        0x10101d7 => 'searchSuggestPath',
+        0x10101d8 => 'searchSuggestSelection',
+        0x10101d9 => 'searchSuggestIntentAction',
+        0x10101da => 'searchSuggestIntentData',
+        0x10101db => 'queryActionMsg',
+        0x10101dc => 'suggestActionMsg',
+        0x10101dd => 'suggestActionMsgColumn',
+        0x10101de => 'menuCategory',
+        0x10101df => 'orderInCategory',
+        0x10101e0 => 'checkableBehavior',
+        0x10101e1 => 'title',
+        0x10101e2 => 'titleCondensed',
+        0x10101e3 => 'alphabeticShortcut',
+        0x10101e4 => 'numericShortcut',
+        0x10101e5 => 'checkable',
+        0x10101e6 => 'selectable',
+        0x10101e7 => 'orderingFromXml',
+        0x10101e8 => 'key',
+        0x10101e9 => 'summary',
+        0x10101ea => 'order',
+        0x10101eb => 'widgetLayout',
+        0x10101ec => 'dependency',
+        0x10101ed => 'defaultValue',
+        0x10101ee => 'shouldDisableView',
+        0x10101ef => 'summaryOn',
+        0x10101f0 => 'summaryOff',
+        0x10101f1 => 'disableDependentsState',
+        0x10101f2 => 'dialogTitle',
+        0x10101f3 => 'dialogMessage',
+        0x10101f4 => 'dialogIcon',
+        0x10101f5 => 'positiveButtonText',
+        0x10101f6 => 'negativeButtonText',
+        0x10101f7 => 'dialogLayout',
+        0x10101f8 => 'entryValues',
+        0x10101f9 => 'ringtoneType',
+        0x10101fa => 'showDefault',
+        0x10101fb => 'showSilent',
+        0x10101fc => 'scaleWidth',
+        0x10101fd => 'scaleHeight',
+        0x10101fe => 'scaleGravity',
+        0x10101ff => 'ignoreGravity',
+        0x1010200 => 'foregroundGravity',
+        0x1010201 => 'tileMode',
+        0x1010202 => 'targetActivity',
+        0x1010203 => 'alwaysRetainTaskState',
+        0x1010204 => 'allowTaskReparenting',
+        0x1010205 => 'field public static final deprecated int searchButtonText',
+        0x1010206 => 'colorForegroundInverse',
+        0x1010207 => 'textAppearanceButton',
+        0x1010208 => 'listSeparatorTextViewStyle',
+        0x1010209 => 'streamType',
+        0x101020a => 'clipOrientation',
+        0x101020b => 'centerColor',
+        0x101020c => 'minSdkVersion',
+        0x101020d => 'windowFullscreen',
+        0x101020e => 'unselectedAlpha',
+        0x101020f => 'progressBarStyleSmallTitle',
+        0x1010210 => 'ratingBarStyleIndicator',
+        0x1010211 => 'apiKey',
+        0x1010212 => 'textColorTertiary',
+        0x1010213 => 'textColorTertiaryInverse',
+        0x1010214 => 'listDivider',
+        0x1010215 => 'soundEffectsEnabled',
+        0x1010216 => 'keepScreenOn',
+        0x1010217 => 'lineSpacingExtra',
+        0x1010218 => 'lineSpacingMultiplier',
+        0x1010219 => 'listChoiceIndicatorSingle',
+        0x101021a => 'listChoiceIndicatorMultiple',
+        0x101021b => 'versionCode',
+        0x101021c => 'versionName',
+        0x101021d => 'marqueeRepeatLimit',
+        0x101021e => 'windowNoDisplay',
+        0x101021f => 'backgroundDimEnabled',
+        0x1010220 => 'inputType',
+        0x1010221 => 'isDefault',
+        0x1010222 => 'windowDisablePreview',
+        0x1010223 => 'privateImeOptions',
+        0x1010224 => 'editorExtras',
+        0x1010225 => 'settingsActivity',
+        0x1010226 => 'fastScrollEnabled',
+        0x1010227 => 'reqTouchScreen',
+        0x1010228 => 'reqKeyboardType',
+        0x1010229 => 'reqHardKeyboard',
+        0x101022a => 'reqNavigation',
+        0x101022b => 'windowSoftInputMode',
+        0x101022c => 'imeFullscreenBackground',
+        0x101022d => 'noHistory',
+        0x101022e => 'headerDividersEnabled',
+        0x101022f => 'footerDividersEnabled',
+        0x1010230 => 'candidatesTextStyleSpans',
+        0x1010231 => 'smoothScrollbar',
+        0x1010232 => 'reqFiveWayNav',
+        0x1010233 => 'keyBackground',
+        0x1010234 => 'keyTextSize',
+        0x1010235 => 'labelTextSize',
+        0x1010236 => 'keyTextColor',
+        0x1010237 => 'keyPreviewLayout',
+        0x1010238 => 'keyPreviewOffset',
+        0x1010239 => 'keyPreviewHeight',
+        0x101023a => 'verticalCorrection',
+        0x101023b => 'popupLayout',
+        0x101023c => 'state_long_pressable',
+        0x101023d => 'keyWidth',
+        0x101023e => 'keyHeight',
+        0x101023f => 'horizontalGap',
+        0x1010240 => 'verticalGap',
+        0x1010241 => 'rowEdgeFlags',
+        0x1010242 => 'codes',
+        0x1010243 => 'popupKeyboard',
+        0x1010244 => 'popupCharacters',
+        0x1010245 => 'keyEdgeFlags',
+        0x1010246 => 'isModifier',
+        0x1010247 => 'isSticky',
+        0x1010248 => 'isRepeatable',
+        0x1010249 => 'iconPreview',
+        0x101024a => 'keyOutputText',
+        0x101024b => 'keyLabel',
+        0x101024c => 'keyIcon',
+        0x101024d => 'keyboardMode',
+        0x101024e => 'isScrollContainer',
+        0x101024f => 'fillEnabled',
+        0x1010250 => 'updatePeriodMillis',
+        0x1010251 => 'initialLayout',
+        0x1010252 => 'voiceSearchMode',
+        0x1010253 => 'voiceLanguageModel',
+        0x1010254 => 'voicePromptText',
+        0x1010255 => 'voiceLanguage',
+        0x1010256 => 'voiceMaxResults',
+        0x1010257 => 'bottomOffset',
+        0x1010258 => 'topOffset',
+        0x1010259 => 'allowSingleTap',
+        0x101025a => 'handle',
+        0x101025b => 'content',
+        0x101025c => 'animateOnClick',
+        0x101025d => 'configure',
+        0x101025e => 'hapticFeedbackEnabled',
+        0x101025f => 'innerRadius',
+        0x1010260 => 'thickness',
+        0x1010261 => 'sharedUserLabel',
+        0x1010262 => 'dropDownWidth',
+        0x1010263 => 'dropDownAnchor',
+        0x1010264 => 'imeOptions',
+        0x1010265 => 'imeActionLabel',
+        0x1010266 => 'imeActionId',
+        0x1010268 => 'imeExtractEnterAnimation',
+        0x1010269 => 'imeExtractExitAnimation',
+        0x101026a => 'tension',
+        0x101026b => 'extraTension',
+        0x101026c => 'anyDensity',
+        0x101026d => 'searchSuggestThreshold',
+        0x101026e => 'includeInGlobalSearch',
+        0x101026f => 'onClick',
+        0x1010270 => 'targetSdkVersion',
+        0x1010271 => 'maxSdkVersion',
+        0x1010272 => 'testOnly',
+        0x1010273 => 'contentDescription',
+        0x1010274 => 'gestureStrokeWidth',
+        0x1010275 => 'gestureColor',
+        0x1010276 => 'uncertainGestureColor',
+        0x1010277 => 'fadeOffset',
+        0x1010278 => 'fadeDuration',
+        0x1010279 => 'gestureStrokeType',
+        0x101027a => 'gestureStrokeLengthThreshold',
+        0x101027b => 'gestureStrokeSquarenessThreshold',
+        0x101027c => 'gestureStrokeAngleThreshold',
+        0x101027d => 'eventsInterceptionEnabled',
+        0x101027e => 'fadeEnabled',
+        0x101027f => 'backupAgent',
+        0x1010280 => 'allowBackup',
+        0x1010281 => 'glEsVersion',
+        0x1010282 => 'queryAfterZeroResults',
+        0x1010283 => 'dropDownHeight',
+        0x1010284 => 'smallScreens',
+        0x1010285 => 'normalScreens',
+        0x1010286 => 'largeScreens',
+        0x1010287 => 'progressBarStyleInverse',
+        0x1010288 => 'progressBarStyleSmallInverse',
+        0x1010289 => 'progressBarStyleLargeInverse',
+        0x101028a => 'searchSettingsDescription',
+        0x101028b => 'textColorPrimaryInverseDisableOnly',
+        0x101028c => 'autoUrlDetect',
+        0x101028d => 'resizeable',
+        0x101028e => 'required',
+        0x101028f => 'accountType',
+        0x1010290 => 'contentAuthority',
+        0x1010291 => 'userVisible',
+        0x1010292 => 'windowShowWallpaper',
+        0x1010293 => 'wallpaperOpenEnterAnimation',
+        0x1010294 => 'wallpaperOpenExitAnimation',
+        0x1010295 => 'wallpaperCloseEnterAnimation',
+        0x1010296 => 'wallpaperCloseExitAnimation',
+        0x1010297 => 'wallpaperIntraOpenEnterAnimation',
+        0x1010298 => 'wallpaperIntraOpenExitAnimation',
+        0x1010299 => 'wallpaperIntraCloseEnterAnimation',
+        0x101029a => 'wallpaperIntraCloseExitAnimation',
+        0x101029b => 'supportsUploading',
+        0x101029c => 'killAfterRestore',
+        0x101029d => 'field public static final deprecated int restoreNeedsApplication',
+        0x101029e => 'smallIcon',
+        0x101029f => 'accountPreferences',
+        0x10102a0 => 'textAppearanceSearchResultSubtitle',
+        0x10102a1 => 'textAppearanceSearchResultTitle',
+        0x10102a2 => 'summaryColumn',
+        0x10102a3 => 'detailColumn',
+        0x10102a4 => 'detailSocialSummary',
+        0x10102a5 => 'thumbnail',
+        0x10102a6 => 'detachWallpaper',
+        0x10102a7 => 'finishOnCloseSystemDialogs',
+        0x10102a8 => 'scrollbarFadeDuration',
+        0x10102a9 => 'scrollbarDefaultDelayBeforeFade',
+        0x10102aa => 'fadeScrollbars',
+        0x10102ab => 'colorBackgroundCacheHint',
+        0x10102ac => 'dropDownHorizontalOffset',
+        0x10102ad => 'dropDownVerticalOffset',
+        0x10102ae => 'quickContactBadgeStyleWindowSmall',
+        0x10102af => 'quickContactBadgeStyleWindowMedium',
+        0x10102b0 => 'quickContactBadgeStyleWindowLarge',
+        0x10102b1 => 'quickContactBadgeStyleSmallWindowSmall',
+        0x10102b2 => 'quickContactBadgeStyleSmallWindowMedium',
+        0x10102b3 => 'quickContactBadgeStyleSmallWindowLarge',
+        0x10102b4 => 'author',
+        0x10102b5 => 'autoStart',
+        0x10102b6 => 'expandableListViewWhiteStyle',
+        0x10102b7 => 'installLocation',
+        0x10102b8 => 'vmSafeMode',
+        0x10102b9 => 'webTextViewStyle',
+        0x10102ba => 'restoreAnyVersion',
+        0x10102bb => 'tabStripLeft',
+        0x10102bc => 'tabStripRight',
+        0x10102bd => 'tabStripEnabled',
+        0x10102be => 'logo',
+        0x10102bf => 'xlargeScreens',
+        0x10102c0 => 'immersive',
+        0x10102c1 => 'overScrollMode',
+        0x10102c2 => 'overScrollHeader',
+        0x10102c3 => 'overScrollFooter',
+        0x10102c4 => 'filterTouchesWhenObscured',
+        0x10102c5 => 'textSelectHandleLeft',
+        0x10102c6 => 'textSelectHandleRight',
+        0x10102c7 => 'textSelectHandle',
+        0x10102c8 => 'textSelectHandleWindowStyle',
+        0x10102c9 => 'popupAnimationStyle',
+        0x10102ca => 'screenSize',
+        0x10102cb => 'screenDensity',
+        0x10102cc => 'allContactsName',
+        0x10102cd => 'windowActionBar',
+        0x10102ce => 'actionBarStyle',
+        0x10102cf => 'navigationMode',
+        0x10102d0 => 'displayOptions',
+        0x10102d1 => 'subtitle',
+        0x10102d2 => 'customNavigationLayout',
+        0x10102d3 => 'hardwareAccelerated',
+        0x10102d4 => 'measureWithLargestChild',
+        0x10102d5 => 'animateFirstView',
+        0x10102d6 => 'dropDownSpinnerStyle',
+        0x10102d7 => 'actionDropDownStyle',
+        0x10102d8 => 'actionButtonStyle',
+        0x10102d9 => 'showAsAction',
+        0x10102da => 'previewImage',
+        0x10102db => 'actionModeBackground',
+        0x10102dc => 'actionModeCloseDrawable',
+        0x10102dd => 'windowActionModeOverlay',
+        0x10102de => 'valueFrom',
+        0x10102df => 'valueTo',
+        0x10102e0 => 'valueType',
+        0x10102e1 => 'propertyName',
+        0x10102e2 => 'ordering',
+        0x10102e3 => 'fragment',
+        0x10102e4 => 'windowActionBarOverlay',
+        0x10102e5 => 'fragmentOpenEnterAnimation',
+        0x10102e6 => 'fragmentOpenExitAnimation',
+        0x10102e7 => 'fragmentCloseEnterAnimation',
+        0x10102e8 => 'fragmentCloseExitAnimation',
+        0x10102e9 => 'fragmentFadeEnterAnimation',
+        0x10102ea => 'fragmentFadeExitAnimation',
+        0x10102eb => 'actionBarSize',
+        0x10102ec => 'imeSubtypeLocale',
+        0x10102ed => 'imeSubtypeMode',
+        0x10102ee => 'imeSubtypeExtraValue',
+        0x10102ef => 'splitMotionEvents',
+        0x10102f0 => 'listChoiceBackgroundIndicator',
+        0x10102f1 => 'spinnerMode',
+        0x10102f2 => 'animateLayoutChanges',
+        0x10102f3 => 'actionBarTabStyle',
+        0x10102f4 => 'actionBarTabBarStyle',
+        0x10102f5 => 'actionBarTabTextStyle',
+        0x10102f6 => 'actionOverflowButtonStyle',
+        0x10102f7 => 'actionModeCloseButtonStyle',
+        0x10102f8 => 'titleTextStyle',
+        0x10102f9 => 'subtitleTextStyle',
+        0x10102fa => 'iconifiedByDefault',
+        0x10102fb => 'actionLayout',
+        0x10102fc => 'actionViewClass',
+        0x10102fd => 'activatedBackgroundIndicator',
+        0x10102fe => 'state_activated',
+        0x10102ff => 'listPopupWindowStyle',
+        0x1010300 => 'popupMenuStyle',
+        0x1010301 => 'textAppearanceLargePopupMenu',
+        0x1010302 => 'textAppearanceSmallPopupMenu',
+        0x1010303 => 'breadCrumbTitle',
+        0x1010304 => 'breadCrumbShortTitle',
+        0x1010305 => 'listDividerAlertDialog',
+        0x1010306 => 'textColorAlertDialogListItem',
+        0x1010307 => 'loopViews',
+        0x1010308 => 'dialogTheme',
+        0x1010309 => 'alertDialogTheme',
+        0x101030a => 'dividerVertical',
+        0x101030b => 'homeAsUpIndicator',
+        0x101030c => 'enterFadeDuration',
+        0x101030d => 'exitFadeDuration',
+        0x101030e => 'selectableItemBackground',
+        0x101030f => 'autoAdvanceViewId',
+        0x1010310 => 'useIntrinsicSizeAsMinimum',
+        0x1010311 => 'actionModeCutDrawable',
+        0x1010312 => 'actionModeCopyDrawable',
+        0x1010313 => 'actionModePasteDrawable',
+        0x1010314 => 'textEditPasteWindowLayout',
+        0x1010315 => 'textEditNoPasteWindowLayout',
+        0x1010316 => 'textIsSelectable',
+        0x1010317 => 'windowEnableSplitTouch',
+        0x1010318 => 'indeterminateProgressStyle',
+        0x1010319 => 'progressBarPadding',
+        0x101031a => 'field public static final deprecated int animationResolution',
+        0x101031b => 'state_accelerated',
+        0x101031c => 'baseline',
+        0x101031d => 'homeLayout',
+        0x101031e => 'opacity',
+        0x101031f => 'alpha',
+        0x1010320 => 'transformPivotX',
+        0x1010321 => 'transformPivotY',
+        0x1010322 => 'translationX',
+        0x1010323 => 'translationY',
+        0x1010324 => 'scaleX',
+        0x1010325 => 'scaleY',
+        0x1010326 => 'rotation',
+        0x1010327 => 'rotationX',
+        0x1010328 => 'rotationY',
+        0x1010329 => 'showDividers',
+        0x101032a => 'dividerPadding',
+        0x101032b => 'borderlessButtonStyle',
+        0x101032c => 'dividerHorizontal',
+        0x101032d => 'itemPadding',
+        0x101032e => 'buttonBarStyle',
+        0x101032f => 'buttonBarButtonStyle',
+        0x1010330 => 'segmentedButtonStyle',
+        0x1010331 => 'staticWallpaperPreview',
+        0x1010332 => 'allowParallelSyncs',
+        0x1010333 => 'isAlwaysSyncable',
+        0x1010334 => 'verticalScrollbarPosition',
+        0x1010335 => 'fastScrollAlwaysVisible',
+        0x1010336 => 'fastScrollThumbDrawable',
+        0x1010337 => 'fastScrollPreviewBackgroundLeft',
+        0x1010338 => 'fastScrollPreviewBackgroundRight',
+        0x1010339 => 'fastScrollTrackDrawable',
+        0x101033a => 'fastScrollOverlayPosition',
+        0x101033b => 'customTokens',
+        0x101033c => 'nextFocusForward',
+        0x101033d => 'firstDayOfWeek',
+        0x101033e => 'showWeekNumber',
+        0x101033f => 'minDate',
+        0x1010340 => 'maxDate',
+        0x1010341 => 'shownWeekCount',
+        0x1010342 => 'selectedWeekBackgroundColor',
+        0x1010343 => 'focusedMonthDateColor',
+        0x1010344 => 'unfocusedMonthDateColor',
+        0x1010345 => 'weekNumberColor',
+        0x1010346 => 'weekSeparatorLineColor',
+        0x1010347 => 'selectedDateVerticalBar',
+        0x1010348 => 'weekDayTextAppearance',
+        0x1010349 => 'dateTextAppearance',
+        0x101034b => 'spinnersShown',
+        0x101034c => 'calendarViewShown',
+        0x101034d => 'state_multiline',
+        0x101034e => 'detailsElementBackground',
+        0x101034f => 'textColorHighlightInverse',
+        0x1010350 => 'textColorLinkInverse',
+        0x1010351 => 'editTextColor',
+        0x1010352 => 'editTextBackground',
+        0x1010353 => 'horizontalScrollViewStyle',
+        0x1010354 => 'layerType',
+        0x1010355 => 'alertDialogIcon',
+        0x1010356 => 'windowMinWidthMajor',
+        0x1010357 => 'windowMinWidthMinor',
+        0x1010358 => 'queryHint',
+        0x1010359 => 'fastScrollTextColor',
+        0x101035a => 'largeHeap',
+        0x101035b => 'windowCloseOnTouchOutside',
+        0x101035c => 'datePickerStyle',
+        0x101035d => 'calendarViewStyle',
+        0x101035e => 'textEditSidePasteWindowLayout',
+        0x101035f => 'textEditSideNoPasteWindowLayout',
+        0x1010360 => 'actionMenuTextAppearance',
+        0x1010361 => 'actionMenuTextColor',
+        0x1010362 => 'textCursorDrawable',
+        0x1010363 => 'resizeMode',
+        0x1010364 => 'requiresSmallestWidthDp',
+        0x1010365 => 'compatibleWidthLimitDp',
+        0x1010366 => 'largestWidthLimitDp',
+        0x1010367 => 'state_hovered',
+        0x1010368 => 'state_drag_can_accept',
+        0x1010369 => 'state_drag_hovered',
+        0x101036a => 'stopWithTask',
+        0x101036b => 'switchTextOn',
+        0x101036c => 'switchTextOff',
+        0x101036d => 'switchPreferenceStyle',
+        0x101036e => 'switchTextAppearance',
+        0x101036f => 'track',
+        0x1010370 => 'switchMinWidth',
+        0x1010371 => 'switchPadding',
+        0x1010372 => 'thumbTextPadding',
+        0x1010373 => 'textSuggestionsWindowStyle',
+        0x1010374 => 'textEditSuggestionItemLayout',
+        0x1010375 => 'rowCount',
+        0x1010376 => 'rowOrderPreserved',
+        0x1010377 => 'columnCount',
+        0x1010378 => 'columnOrderPreserved',
+        0x1010379 => 'useDefaultMargins',
+        0x101037a => 'alignmentMode',
+        0x101037b => 'layout_row',
+        0x101037c => 'layout_rowSpan',
+        0x101037d => 'layout_columnSpan',
+        0x101037e => 'actionModeSelectAllDrawable',
+        0x101037f => 'isAuxiliary',
+        0x1010380 => 'accessibilityEventTypes',
+        0x1010381 => 'packageNames',
+        0x1010382 => 'accessibilityFeedbackType',
+        0x1010383 => 'notificationTimeout',
+        0x1010384 => 'accessibilityFlags',
+        0x1010385 => 'canRetrieveWindowContent',
+        0x1010386 => 'listPreferredItemHeightLarge',
+        0x1010387 => 'listPreferredItemHeightSmall',
+        0x1010388 => 'actionBarSplitStyle',
+        0x1010389 => 'actionProviderClass',
+        0x101038a => 'backgroundStacked',
+        0x101038b => 'backgroundSplit',
+        0x101038c => 'textAllCaps',
+        0x101038d => 'colorPressedHighlight',
+        0x101038e => 'colorLongPressedHighlight',
+        0x101038f => 'colorFocusedHighlight',
+        0x1010390 => 'colorActivatedHighlight',
+        0x1010391 => 'colorMultiSelectHighlight',
+        0x1010392 => 'drawableStart',
+        0x1010393 => 'drawableEnd',
+        0x1010394 => 'actionModeStyle',
+        0x1010395 => 'minResizeWidth',
+        0x1010396 => 'minResizeHeight',
+        0x1010397 => 'actionBarWidgetTheme',
+        0x1010398 => 'uiOptions',
+        0x1010399 => 'subtypeLocale',
+        0x101039a => 'subtypeExtraValue',
+        0x101039b => 'actionBarDivider',
+        0x101039c => 'actionBarItemBackground',
+        0x101039d => 'actionModeSplitBackground',
+        0x101039e => 'textAppearanceListItem',
+        0x101039f => 'textAppearanceListItemSmall',
+        0x10103a0 => 'targetDescriptions',
+        0x10103a1 => 'directionDescriptions',
+        0x10103a2 => 'overridesImplicitlyEnabledSubtype',
+        0x10103a3 => 'listPreferredItemPaddingLeft',
+        0x10103a4 => 'listPreferredItemPaddingRight',
+        0x10103a5 => 'requiresFadingEdge',
+        0x10103a6 => 'publicKey',
+        0x10103a7 => 'parentActivityName',
+        0x10103a9 => 'isolatedProcess',
+        0x10103aa => 'importantForAccessibility',
+        0x10103ab => 'keyboardLayout',
+        0x10103ac => 'fontFamily',
+        0x10103ad => 'mediaRouteButtonStyle',
+        0x10103ae => 'mediaRouteTypes',
+        0x10103af => 'supportsRtl',
+        0x10103b0 => 'textDirection',
+        0x10103b1 => 'textAlignment',
+        0x10103b2 => 'layoutDirection',
+        0x10103b3 => 'paddingStart',
+        0x10103b4 => 'paddingEnd',
+        0x10103b5 => 'layout_marginStart',
+        0x10103b6 => 'layout_marginEnd',
+        0x10103b7 => 'layout_toStartOf',
+        0x10103b8 => 'layout_toEndOf',
+        0x10103b9 => 'layout_alignStart',
+        0x10103ba => 'layout_alignEnd',
+        0x10103bb => 'layout_alignParentStart',
+        0x10103bc => 'layout_alignParentEnd',
+        0x10103bd => 'listPreferredItemPaddingStart',
+        0x10103be => 'listPreferredItemPaddingEnd',
+        0x10103bf => 'singleUser',
+        0x10103c0 => 'presentationTheme',
+        0x10103c1 => 'subtypeId',
+        0x10103c2 => 'initialKeyguardLayout',
+        0x10103c4 => 'widgetCategory',
+        0x10103c5 => 'permissionGroupFlags',
+        0x10103c6 => 'labelFor',
+        0x10103c7 => 'permissionFlags',
+        0x10103c8 => 'checkedTextViewStyle',
+        0x10103c9 => 'showOnLockScreen',
+        0x10103ca => 'format12Hour',
+        0x10103cb => 'format24Hour',
+        0x10103cc => 'timeZone',
+    ];
 
     /**
      * @param Stream $apkStream
@@ -337,2925 +1311,9 @@ class XmlParser
 
     public function getResourceNameFromID($id)
     {
-        switch ($id) {
-            // These values are taken from the Android Manifest class.
-            case 0x1010000:
-                $resName = "theme";
-                break;
-            case 0x1010001:
-                $resName = "label";
-                break;
-            case 0x1010002:
-                $resName = "icon";
-                break;
-            case 0x1010003:
-                $resName = "name";
-                break;
-            case 0x1010004:
-                $resName = "manageSpaceActivity";
-                break;
-            case 0x1010005:
-                $resName = "allowClearUserData";
-                break;
-            case 0x1010006:
-                $resName = "permission";
-                break;
-            case 0x1010007:
-                $resName = "readPermission";
-                break;
-            case 0x1010008:
-                $resName = "writePermission";
-                break;
-            case 0x1010009:
-                $resName = "protectionLevel";
-                break;
-            case 0x101000a:
-                $resName = "permissionGroup";
-                break;
-            case 0x101000b:
-                $resName = "sharedUserId";
-                break;
-            case 0x101000c:
-                $resName = "hasCode";
-                break;
-            case 0x101000d:
-                $resName = "persistent";
-                break;
-            case 0x101000e:
-                $resName = "enabled";
-                break;
-            case 0x101000f:
-                $resName = "debuggable";
-                break;
-            case 0x1010010:
-                $resName = "exported";
-                break;
-            case 0x1010011:
-                $resName = "process";
-                break;
-            case 0x1010012:
-                $resName = "taskAffinity";
-                break;
-            case 0x1010013:
-                $resName = "multiprocess";
-                break;
-            case 0x1010014:
-                $resName = "finishOnTaskLaunch";
-                break;
-            case 0x1010015:
-                $resName = "clearTaskOnLaunch";
-                break;
-            case 0x1010016:
-                $resName = "stateNotNeeded";
-                break;
-            case 0x1010017:
-                $resName = "excludeFromRecents";
-                break;
-            case 0x1010018:
-                $resName = "authorities";
-                break;
-            case 0x1010019:
-                $resName = "syncable";
-                break;
-            case 0x101001a:
-                $resName = "initOrder";
-                break;
-            case 0x101001b:
-                $resName = "grantUriPermissions";
-                break;
-            case 0x101001c:
-                $resName = "priority";
-                break;
-            case 0x101001d:
-                $resName = "launchMode";
-                break;
-            case 0x101001e:
-                $resName = "screenOrientation";
-                break;
-            case 0x101001f:
-                $resName = "configChanges";
-                break;
-            case 0x1010020:
-                $resName = "description";
-                break;
-            case 0x1010021:
-                $resName = "targetPackage";
-                break;
-            case 0x1010022:
-                $resName = "handleProfiling";
-                break;
-            case 0x1010023:
-                $resName = "functionalTest";
-                break;
-            case 0x1010024:
-                $resName = "value";
-                break;
-            case 0x1010025:
-                $resName = "resource";
-                break;
-            case 0x1010026:
-                $resName = "mimeType";
-                break;
-            case 0x1010027:
-                $resName = "scheme";
-                break;
-            case 0x1010028:
-                $resName = "host";
-                break;
-            case 0x1010029:
-                $resName = "port";
-                break;
-            case 0x101002a:
-                $resName = "path";
-                break;
-            case 0x101002b:
-                $resName = "pathPrefix";
-                break;
-            case 0x101002c:
-                $resName = "pathPattern";
-                break;
-            case 0x101002d:
-                $resName = "action";
-                break;
-            case 0x101002e:
-                $resName = "data";
-                break;
-            case 0x101002f:
-                $resName = "targetClass";
-                break;
-            case 0x1010030:
-                $resName = "colorForeground";
-                break;
-            case 0x1010031:
-                $resName = "colorBackground";
-                break;
-            case 0x1010032:
-                $resName = "backgroundDimAmount";
-                break;
-            case 0x1010033:
-                $resName = "disabledAlpha";
-                break;
-            case 0x1010034:
-                $resName = "textAppearance";
-                break;
-            case 0x1010035:
-                $resName = "textAppearanceInverse";
-                break;
-            case 0x1010036:
-                $resName = "textColorPrimary";
-                break;
-            case 0x1010037:
-                $resName = "textColorPrimaryDisableOnly";
-                break;
-            case 0x1010038:
-                $resName = "textColorSecondary";
-                break;
-            case 0x1010039:
-                $resName = "textColorPrimaryInverse";
-                break;
-            case 0x101003a:
-                $resName = "textColorSecondaryInverse";
-                break;
-            case 0x101003b:
-                $resName = "textColorPrimaryNoDisable";
-                break;
-            case 0x101003c:
-                $resName = "textColorSecondaryNoDisable";
-                break;
-            case 0x101003d:
-                $resName = "textColorPrimaryInverseNoDisable";
-                break;
-            case 0x101003e:
-                $resName = "textColorSecondaryInverseNoDisable";
-                break;
-            case 0x101003f:
-                $resName = "textColorHintInverse";
-                break;
-            case 0x1010040:
-                $resName = "textAppearanceLarge";
-                break;
-            case 0x1010041:
-                $resName = "textAppearanceMedium";
-                break;
-            case 0x1010042:
-                $resName = "textAppearanceSmall";
-                break;
-            case 0x1010043:
-                $resName = "textAppearanceLargeInverse";
-                break;
-            case 0x1010044:
-                $resName = "textAppearanceMediumInverse";
-                break;
-            case 0x1010045:
-                $resName = "textAppearanceSmallInverse";
-                break;
-            case 0x1010046:
-                $resName = "textCheckMark";
-                break;
-            case 0x1010047:
-                $resName = "textCheckMarkInverse";
-                break;
-            case 0x1010048:
-                $resName = "buttonStyle";
-                break;
-            case 0x1010049:
-                $resName = "buttonStyleSmall";
-                break;
-            case 0x101004a:
-                $resName = "buttonStyleInset";
-                break;
-            case 0x101004b:
-                $resName = "buttonStyleToggle";
-                break;
-            case 0x101004c:
-                $resName = "galleryItemBackground";
-                break;
-            case 0x101004d:
-                $resName = "listPreferredItemHeight";
-                break;
-            case 0x101004e:
-                $resName = "expandableListPreferredItemPaddingLeft";
-                break;
-            case 0x101004f:
-                $resName = "expandableListPreferredChildPaddingLeft";
-                break;
-            case 0x1010050:
-                $resName = "expandableListPreferredItemIndicatorLeft";
-                break;
-            case 0x1010051:
-                $resName = "expandableListPreferredItemIndicatorRight";
-                break;
-            case 0x1010052:
-                $resName = "expandableListPreferredChildIndicatorLeft";
-                break;
-            case 0x1010053:
-                $resName = "expandableListPreferredChildIndicatorRight";
-                break;
-            case 0x1010054:
-                $resName = "windowBackground";
-                break;
-            case 0x1010055:
-                $resName = "windowFrame";
-                break;
-            case 0x1010056:
-                $resName = "windowNoTitle";
-                break;
-            case 0x1010057:
-                $resName = "windowIsFloating";
-                break;
-            case 0x1010058:
-                $resName = "windowIsTranslucent";
-                break;
-            case 0x1010059:
-                $resName = "windowContentOverlay";
-                break;
-            case 0x101005a:
-                $resName = "windowTitleSize";
-                break;
-            case 0x101005b:
-                $resName = "windowTitleStyle";
-                break;
-            case 0x101005c:
-                $resName = "windowTitleBackgroundStyle";
-                break;
-            case 0x101005d:
-                $resName = "alertDialogStyle";
-                break;
-            case 0x101005e:
-                $resName = "panelBackground";
-                break;
-            case 0x101005f:
-                $resName = "panelFullBackground";
-                break;
-            case 0x1010060:
-                $resName = "panelColorForeground";
-                break;
-            case 0x1010061:
-                $resName = "panelColorBackground";
-                break;
-            case 0x1010062:
-                $resName = "panelTextAppearance";
-                break;
-            case 0x1010063:
-                $resName = "scrollbarSize";
-                break;
-            case 0x1010064:
-                $resName = "scrollbarThumbHorizontal";
-                break;
-            case 0x1010065:
-                $resName = "scrollbarThumbVertical";
-                break;
-            case 0x1010066:
-                $resName = "scrollbarTrackHorizontal";
-                break;
-            case 0x1010067:
-                $resName = "scrollbarTrackVertical";
-                break;
-            case 0x1010068:
-                $resName = "scrollbarAlwaysDrawHorizontalTrack";
-                break;
-            case 0x1010069:
-                $resName = "scrollbarAlwaysDrawVerticalTrack";
-                break;
-            case 0x101006a:
-                $resName = "absListViewStyle";
-                break;
-            case 0x101006b:
-                $resName = "autoCompleteTextViewStyle";
-                break;
-            case 0x101006c:
-                $resName = "checkboxStyle";
-                break;
-            case 0x101006d:
-                $resName = "dropDownListViewStyle";
-                break;
-            case 0x101006e:
-                $resName = "editTextStyle";
-                break;
-            case 0x101006f:
-                $resName = "expandableListViewStyle";
-                break;
-            case 0x1010070:
-                $resName = "galleryStyle";
-                break;
-            case 0x1010071:
-                $resName = "gridViewStyle";
-                break;
-            case 0x1010072:
-                $resName = "imageButtonStyle";
-                break;
-            case 0x1010073:
-                $resName = "imageWellStyle";
-                break;
-            case 0x1010074:
-                $resName = "listViewStyle";
-                break;
-            case 0x1010075:
-                $resName = "listViewWhiteStyle";
-                break;
-            case 0x1010076:
-                $resName = "popupWindowStyle";
-                break;
-            case 0x1010077:
-                $resName = "progressBarStyle";
-                break;
-            case 0x1010078:
-                $resName = "progressBarStyleHorizontal";
-                break;
-            case 0x1010079:
-                $resName = "progressBarStyleSmall";
-                break;
-            case 0x101007a:
-                $resName = "progressBarStyleLarge";
-                break;
-            case 0x101007b:
-                $resName = "seekBarStyle";
-                break;
-            case 0x101007c:
-                $resName = "ratingBarStyle";
-                break;
-            case 0x101007d:
-                $resName = "ratingBarStyleSmall";
-                break;
-            case 0x101007e:
-                $resName = "radioButtonStyle";
-                break;
-            case 0x101007f:
-                $resName = "scrollbarStyle";
-                break;
-            case 0x1010080:
-                $resName = "scrollViewStyle";
-                break;
-            case 0x1010081:
-                $resName = "spinnerStyle";
-                break;
-            case 0x1010082:
-                $resName = "starStyle";
-                break;
-            case 0x1010083:
-                $resName = "tabWidgetStyle";
-                break;
-            case 0x1010084:
-                $resName = "textViewStyle";
-                break;
-            case 0x1010085:
-                $resName = "webViewStyle";
-                break;
-            case 0x1010086:
-                $resName = "dropDownItemStyle";
-                break;
-            case 0x1010087:
-                $resName = "spinnerDropDownItemStyle";
-                break;
-            case 0x1010088:
-                $resName = "dropDownHintAppearance";
-                break;
-            case 0x1010089:
-                $resName = "spinnerItemStyle";
-                break;
-            case 0x101008a:
-                $resName = "mapViewStyle";
-                break;
-            case 0x101008b:
-                $resName = "preferenceScreenStyle";
-                break;
-            case 0x101008c:
-                $resName = "preferenceCategoryStyle";
-                break;
-            case 0x101008d:
-                $resName = "preferenceInformationStyle";
-                break;
-            case 0x101008e:
-                $resName = "preferenceStyle";
-                break;
-            case 0x101008f:
-                $resName = "checkBoxPreferenceStyle";
-                break;
-            case 0x1010090:
-                $resName = "yesNoPreferenceStyle";
-                break;
-            case 0x1010091:
-                $resName = "dialogPreferenceStyle";
-                break;
-            case 0x1010092:
-                $resName = "editTextPreferenceStyle";
-                break;
-            case 0x1010093:
-                $resName = "ringtonePreferenceStyle";
-                break;
-            case 0x1010094:
-                $resName = "preferenceLayoutChild";
-                break;
-            case 0x1010095:
-                $resName = "textSize";
-                break;
-            case 0x1010096:
-                $resName = "typeface";
-                break;
-            case 0x1010097:
-                $resName = "textStyle";
-                break;
-            case 0x1010098:
-                $resName = "textColor";
-                break;
-            case 0x1010099:
-                $resName = "textColorHighlight";
-                break;
-            case 0x101009a:
-                $resName = "textColorHint";
-                break;
-            case 0x101009b:
-                $resName = "textColorLink";
-                break;
-            case 0x101009c:
-                $resName = "state_focused";
-                break;
-            case 0x101009d:
-                $resName = "state_window_focused";
-                break;
-            case 0x101009e:
-                $resName = "state_enabled";
-                break;
-            case 0x101009f:
-                $resName = "state_checkable";
-                break;
-            case 0x10100a0:
-                $resName = "state_checked";
-                break;
-            case 0x10100a1:
-                $resName = "state_selected";
-                break;
-            case 0x10100a2:
-                $resName = "state_active";
-                break;
-            case 0x10100a3:
-                $resName = "state_single";
-                break;
-            case 0x10100a4:
-                $resName = "state_first";
-                break;
-            case 0x10100a5:
-                $resName = "state_middle";
-                break;
-            case 0x10100a6:
-                $resName = "state_last";
-                break;
-            case 0x10100a7:
-                $resName = "state_pressed";
-                break;
-            case 0x10100a8:
-                $resName = "state_expanded";
-                break;
-            case 0x10100a9:
-                $resName = "state_empty";
-                break;
-            case 0x10100aa:
-                $resName = "state_above_anchor";
-                break;
-            case 0x10100ab:
-                $resName = "ellipsize";
-                break;
-            case 0x10100ac:
-                $resName = "x";
-                break;
-            case 0x10100ad:
-                $resName = "y";
-                break;
-            case 0x10100ae:
-                $resName = "windowAnimationStyle";
-                break;
-            case 0x10100af:
-                $resName = "gravity";
-                break;
-            case 0x10100b0:
-                $resName = "autoLink";
-                break;
-            case 0x10100b1:
-                $resName = "linksClickable";
-                break;
-            case 0x10100b2:
-                $resName = "entries";
-                break;
-            case 0x10100b3:
-                $resName = "layout_gravity";
-                break;
-            case 0x10100b4:
-                $resName = "windowEnterAnimation";
-                break;
-            case 0x10100b5:
-                $resName = "windowExitAnimation";
-                break;
-            case 0x10100b6:
-                $resName = "windowShowAnimation";
-                break;
-            case 0x10100b7:
-                $resName = "windowHideAnimation";
-                break;
-            case 0x10100b8:
-                $resName = "activityOpenEnterAnimation";
-                break;
-            case 0x10100b9:
-                $resName = "activityOpenExitAnimation";
-                break;
-            case 0x10100ba:
-                $resName = "activityCloseEnterAnimation";
-                break;
-            case 0x10100bb:
-                $resName = "activityCloseExitAnimation";
-                break;
-            case 0x10100bc:
-                $resName = "taskOpenEnterAnimation";
-                break;
-            case 0x10100bd:
-                $resName = "taskOpenExitAnimation";
-                break;
-            case 0x10100be:
-                $resName = "taskCloseEnterAnimation";
-                break;
-            case 0x10100bf:
-                $resName = "taskCloseExitAnimation";
-                break;
-            case 0x10100c0:
-                $resName = "taskToFrontEnterAnimation";
-                break;
-            case 0x10100c1:
-                $resName = "taskToFrontExitAnimation";
-                break;
-            case 0x10100c2:
-                $resName = "taskToBackEnterAnimation";
-                break;
-            case 0x10100c3:
-                $resName = "taskToBackExitAnimation";
-                break;
-            case 0x10100c4:
-                $resName = "orientation";
-                break;
-            case 0x10100c5:
-                $resName = "keycode";
-                break;
-            case 0x10100c6:
-                $resName = "fullDark";
-                break;
-            case 0x10100c7:
-                $resName = "topDark";
-                break;
-            case 0x10100c8:
-                $resName = "centerDark";
-                break;
-            case 0x10100c9:
-                $resName = "bottomDark";
-                break;
-            case 0x10100ca:
-                $resName = "fullBright";
-                break;
-            case 0x10100cb:
-                $resName = "topBright";
-                break;
-            case 0x10100cc:
-                $resName = "centerBright";
-                break;
-            case 0x10100cd:
-                $resName = "bottomBright";
-                break;
-            case 0x10100ce:
-                $resName = "bottomMedium";
-                break;
-            case 0x10100cf:
-                $resName = "centerMedium";
-                break;
-            case 0x10100d0:
-                $resName = "id";
-                break;
-            case 0x10100d1:
-                $resName = "tag";
-                break;
-            case 0x10100d2:
-                $resName = "scrollX";
-                break;
-            case 0x10100d3:
-                $resName = "scrollY";
-                break;
-            case 0x10100d4:
-                $resName = "background";
-                break;
-            case 0x10100d5:
-                $resName = "padding";
-                break;
-            case 0x10100d6:
-                $resName = "paddingLeft";
-                break;
-            case 0x10100d7:
-                $resName = "paddingTop";
-                break;
-            case 0x10100d8:
-                $resName = "paddingRight";
-                break;
-            case 0x10100d9:
-                $resName = "paddingBottom";
-                break;
-            case 0x10100da:
-                $resName = "focusable";
-                break;
-            case 0x10100db:
-                $resName = "focusableInTouchMode";
-                break;
-            case 0x10100dc:
-                $resName = "visibility";
-                break;
-            case 0x10100dd:
-                $resName = "fitsSystemWindows";
-                break;
-            case 0x10100de:
-                $resName = "scrollbars";
-                break;
-            case 0x10100df:
-                $resName = "fadingEdge";
-                break;
-            case 0x10100e0:
-                $resName = "fadingEdgeLength";
-                break;
-            case 0x10100e1:
-                $resName = "nextFocusLeft";
-                break;
-            case 0x10100e2:
-                $resName = "nextFocusRight";
-                break;
-            case 0x10100e3:
-                $resName = "nextFocusUp";
-                break;
-            case 0x10100e4:
-                $resName = "nextFocusDown";
-                break;
-            case 0x10100e5:
-                $resName = "clickable";
-                break;
-            case 0x10100e6:
-                $resName = "longClickable";
-                break;
-            case 0x10100e7:
-                $resName = "saveEnabled";
-                break;
-            case 0x10100e8:
-                $resName = "drawingCacheQuality";
-                break;
-            case 0x10100e9:
-                $resName = "duplicateParentState";
-                break;
-            case 0x10100ea:
-                $resName = "clipChildren";
-                break;
-            case 0x10100eb:
-                $resName = "clipToPadding";
-                break;
-            case 0x10100ec:
-                $resName = "layoutAnimation";
-                break;
-            case 0x10100ed:
-                $resName = "animationCache";
-                break;
-            case 0x10100ee:
-                $resName = "persistentDrawingCache";
-                break;
-            case 0x10100ef:
-                $resName = "alwaysDrawnWithCache";
-                break;
-            case 0x10100f0:
-                $resName = "addStatesFromChildren";
-                break;
-            case 0x10100f1:
-                $resName = "descendantFocusability";
-                break;
-            case 0x10100f2:
-                $resName = "layout";
-                break;
-            case 0x10100f3:
-                $resName = "inflatedId";
-                break;
-            case 0x10100f4:
-                $resName = "layout_width";
-                break;
-            case 0x10100f5:
-                $resName = "layout_height";
-                break;
-            case 0x10100f6:
-                $resName = "layout_margin";
-                break;
-            case 0x10100f7:
-                $resName = "layout_marginLeft";
-                break;
-            case 0x10100f8:
-                $resName = "layout_marginTop";
-                break;
-            case 0x10100f9:
-                $resName = "layout_marginRight";
-                break;
-            case 0x10100fa:
-                $resName = "layout_marginBottom";
-                break;
-            case 0x10100fb:
-                $resName = "listSelector";
-                break;
-            case 0x10100fc:
-                $resName = "drawSelectorOnTop";
-                break;
-            case 0x10100fd:
-                $resName = "stackFromBottom";
-                break;
-            case 0x10100fe:
-                $resName = "scrollingCache";
-                break;
-            case 0x10100ff:
-                $resName = "textFilterEnabled";
-                break;
-            case 0x1010100:
-                $resName = "transcriptMode";
-                break;
-            case 0x1010101:
-                $resName = "cacheColorHint";
-                break;
-            case 0x1010102:
-                $resName = "dial";
-                break;
-            case 0x1010103:
-                $resName = "hand_hour";
-                break;
-            case 0x1010104:
-                $resName = "hand_minute";
-                break;
-            case 0x1010105:
-                $resName = "format";
-                break;
-            case 0x1010106:
-                $resName = "checked";
-                break;
-            case 0x1010107:
-                $resName = "button";
-                break;
-            case 0x1010108:
-                $resName = "checkMark";
-                break;
-            case 0x1010109:
-                $resName = "foreground";
-                break;
-            case 0x101010a:
-                $resName = "measureAllChildren";
-                break;
-            case 0x101010b:
-                $resName = "groupIndicator";
-                break;
-            case 0x101010c:
-                $resName = "childIndicator";
-                break;
-            case 0x101010d:
-                $resName = "indicatorLeft";
-                break;
-            case 0x101010e:
-                $resName = "indicatorRight";
-                break;
-            case 0x101010f:
-                $resName = "childIndicatorLeft";
-                break;
-            case 0x1010110:
-                $resName = "childIndicatorRight";
-                break;
-            case 0x1010111:
-                $resName = "childDivider";
-                break;
-            case 0x1010112:
-                $resName = "animationDuration";
-                break;
-            case 0x1010113:
-                $resName = "spacing";
-                break;
-            case 0x1010114:
-                $resName = "horizontalSpacing";
-                break;
-            case 0x1010115:
-                $resName = "verticalSpacing";
-                break;
-            case 0x1010116:
-                $resName = "stretchMode";
-                break;
-            case 0x1010117:
-                $resName = "columnWidth";
-                break;
-            case 0x1010118:
-                $resName = "numColumns";
-                break;
-            case 0x1010119:
-                $resName = "src";
-                break;
-            case 0x101011a:
-                $resName = "antialias";
-                break;
-            case 0x101011b:
-                $resName = "filter";
-                break;
-            case 0x101011c:
-                $resName = "dither";
-                break;
-            case 0x101011d:
-                $resName = "scaleType";
-                break;
-            case 0x101011e:
-                $resName = "adjustViewBounds";
-                break;
-            case 0x101011f:
-                $resName = "maxWidth";
-                break;
-            case 0x1010120:
-                $resName = "maxHeight";
-                break;
-            case 0x1010121:
-                $resName = "tint";
-                break;
-            case 0x1010122:
-                $resName = "baselineAlignBottom";
-                break;
-            case 0x1010123:
-                $resName = "cropToPadding";
-                break;
-            case 0x1010124:
-                $resName = "textOn";
-                break;
-            case 0x1010125:
-                $resName = "textOff";
-                break;
-            case 0x1010126:
-                $resName = "baselineAligned";
-                break;
-            case 0x1010127:
-                $resName = "baselineAlignedChildIndex";
-                break;
-            case 0x1010128:
-                $resName = "weightSum";
-                break;
-            case 0x1010129:
-                $resName = "divider";
-                break;
-            case 0x101012a:
-                $resName = "dividerHeight";
-                break;
-            case 0x101012b:
-                $resName = "choiceMode";
-                break;
-            case 0x101012c:
-                $resName = "itemTextAppearance";
-                break;
-            case 0x101012d:
-                $resName = "horizontalDivider";
-                break;
-            case 0x101012e:
-                $resName = "verticalDivider";
-                break;
-            case 0x101012f:
-                $resName = "headerBackground";
-                break;
-            case 0x1010130:
-                $resName = "itemBackground";
-                break;
-            case 0x1010131:
-                $resName = "itemIconDisabledAlpha";
-                break;
-            case 0x1010132:
-                $resName = "rowHeight";
-                break;
-            case 0x1010133:
-                $resName = "maxRows";
-                break;
-            case 0x1010134:
-                $resName = "maxItemsPerRow";
-                break;
-            case 0x1010135:
-                $resName = "moreIcon";
-                break;
-            case 0x1010136:
-                $resName = "max";
-                break;
-            case 0x1010137:
-                $resName = "progress";
-                break;
-            case 0x1010138:
-                $resName = "secondaryProgress";
-                break;
-            case 0x1010139:
-                $resName = "indeterminate";
-                break;
-            case 0x101013a:
-                $resName = "indeterminateOnly";
-                break;
-            case 0x101013b:
-                $resName = "indeterminateDrawable";
-                break;
-            case 0x101013c:
-                $resName = "progressDrawable";
-                break;
-            case 0x101013d:
-                $resName = "indeterminateDuration";
-                break;
-            case 0x101013e:
-                $resName = "indeterminateBehavior";
-                break;
-            case 0x101013f:
-                $resName = "minWidth";
-                break;
-            case 0x1010140:
-                $resName = "minHeight";
-                break;
-            case 0x1010141:
-                $resName = "interpolator";
-                break;
-            case 0x1010142:
-                $resName = "thumb";
-                break;
-            case 0x1010143:
-                $resName = "thumbOffset";
-                break;
-            case 0x1010144:
-                $resName = "numStars";
-                break;
-            case 0x1010145:
-                $resName = "rating";
-                break;
-            case 0x1010146:
-                $resName = "stepSize";
-                break;
-            case 0x1010147:
-                $resName = "isIndicator";
-                break;
-            case 0x1010148:
-                $resName = "checkedButton";
-                break;
-            case 0x1010149:
-                $resName = "stretchColumns";
-                break;
-            case 0x101014a:
-                $resName = "shrinkColumns";
-                break;
-            case 0x101014b:
-                $resName = "collapseColumns";
-                break;
-            case 0x101014c:
-                $resName = "layout_column";
-                break;
-            case 0x101014d:
-                $resName = "layout_span";
-                break;
-            case 0x101014e:
-                $resName = "bufferType";
-                break;
-            case 0x101014f:
-                $resName = "text";
-                break;
-            case 0x1010150:
-                $resName = "hint";
-                break;
-            case 0x1010151:
-                $resName = "textScaleX";
-                break;
-            case 0x1010152:
-                $resName = "cursorVisible";
-                break;
-            case 0x1010153:
-                $resName = "maxLines";
-                break;
-            case 0x1010154:
-                $resName = "lines";
-                break;
-            case 0x1010155:
-                $resName = "height";
-                break;
-            case 0x1010156:
-                $resName = "minLines";
-                break;
-            case 0x1010157:
-                $resName = "maxEms";
-                break;
-            case 0x1010158:
-                $resName = "ems";
-                break;
-            case 0x1010159:
-                $resName = "width";
-                break;
-            case 0x101015a:
-                $resName = "minEms";
-                break;
-            case 0x101015b:
-                $resName = "scrollHorizontally";
-                break;
-            case 0x101015c:
-                $resName = "field public static final deprecated int password";
-                break;
-            case 0x101015d:
-                $resName = "field public static final deprecated int singleLine";
-                break;
-            case 0x101015e:
-                $resName = "selectAllOnFocus";
-                break;
-            case 0x101015f:
-                $resName = "includeFontPadding";
-                break;
-            case 0x1010160:
-                $resName = "maxLength";
-                break;
-            case 0x1010161:
-                $resName = "shadowColor";
-                break;
-            case 0x1010162:
-                $resName = "shadowDx";
-                break;
-            case 0x1010163:
-                $resName = "shadowDy";
-                break;
-            case 0x1010164:
-                $resName = "shadowRadius";
-                break;
-            case 0x1010165:
-                $resName = "field public static final deprecated int numeric";
-                break;
-            case 0x1010166:
-                $resName = "digits";
-                break;
-            case 0x1010167:
-                $resName = "field public static final deprecated int phoneNumber";
-                break;
-            case 0x1010168:
-                $resName = "field public static final deprecated int inputMethod";
-                break;
-            case 0x1010169:
-                $resName = "field public static final deprecated int capitalize";
-                break;
-            case 0x101016a:
-                $resName = "field public static final deprecated int autoText";
-                break;
-            case 0x101016b:
-                $resName = "field public static final deprecated int editable";
-                break;
-            case 0x101016c:
-                $resName = "freezesText";
-                break;
-            case 0x101016d:
-                $resName = "drawableTop";
-                break;
-            case 0x101016e:
-                $resName = "drawableBottom";
-                break;
-            case 0x101016f:
-                $resName = "drawableLeft";
-                break;
-            case 0x1010170:
-                $resName = "drawableRight";
-                break;
-            case 0x1010171:
-                $resName = "drawablePadding";
-                break;
-            case 0x1010172:
-                $resName = "completionHint";
-                break;
-            case 0x1010173:
-                $resName = "completionHintView";
-                break;
-            case 0x1010174:
-                $resName = "completionThreshold";
-                break;
-            case 0x1010175:
-                $resName = "dropDownSelector";
-                break;
-            case 0x1010176:
-                $resName = "popupBackground";
-                break;
-            case 0x1010177:
-                $resName = "inAnimation";
-                break;
-            case 0x1010178:
-                $resName = "outAnimation";
-                break;
-            case 0x1010179:
-                $resName = "flipInterval";
-                break;
-            case 0x101017a:
-                $resName = "fillViewport";
-                break;
-            case 0x101017b:
-                $resName = "prompt";
-                break;
-            case 0x101017c:
-                $resName = "field public static final deprecated int startYear";
-                break;
-            case 0x101017d:
-                $resName = "field public static final deprecated int endYear";
-                break;
-            case 0x101017e:
-                $resName = "mode";
-                break;
-            case 0x101017f:
-                $resName = "layout_x";
-                break;
-            case 0x1010180:
-                $resName = "layout_y";
-                break;
-            case 0x1010181:
-                $resName = "layout_weight";
-                break;
-            case 0x1010182:
-                $resName = "layout_toLeftOf";
-                break;
-            case 0x1010183:
-                $resName = "layout_toRightOf";
-                break;
-            case 0x1010184:
-                $resName = "layout_above";
-                break;
-            case 0x1010185:
-                $resName = "layout_below";
-                break;
-            case 0x1010186:
-                $resName = "layout_alignBaseline";
-                break;
-            case 0x1010187:
-                $resName = "layout_alignLeft";
-                break;
-            case 0x1010188:
-                $resName = "layout_alignTop";
-                break;
-            case 0x1010189:
-                $resName = "layout_alignRight";
-                break;
-            case 0x101018a:
-                $resName = "layout_alignBottom";
-                break;
-            case 0x101018b:
-                $resName = "layout_alignParentLeft";
-                break;
-            case 0x101018c:
-                $resName = "layout_alignParentTop";
-                break;
-            case 0x101018d:
-                $resName = "layout_alignParentRight";
-                break;
-            case 0x101018e:
-                $resName = "layout_alignParentBottom";
-                break;
-            case 0x101018f:
-                $resName = "layout_centerInParent";
-                break;
-            case 0x1010190:
-                $resName = "layout_centerHorizontal";
-                break;
-            case 0x1010191:
-                $resName = "layout_centerVertical";
-                break;
-            case 0x1010192:
-                $resName = "layout_alignWithParentIfMissing";
-                break;
-            case 0x1010193:
-                $resName = "layout_scale";
-                break;
-            case 0x1010194:
-                $resName = "visible";
-                break;
-            case 0x1010195:
-                $resName = "variablePadding";
-                break;
-            case 0x1010196:
-                $resName = "constantSize";
-                break;
-            case 0x1010197:
-                $resName = "oneshot";
-                break;
-            case 0x1010198:
-                $resName = "duration";
-                break;
-            case 0x1010199:
-                $resName = "drawable";
-                break;
-            case 0x101019a:
-                $resName = "shape";
-                break;
-            case 0x101019b:
-                $resName = "innerRadiusRatio";
-                break;
-            case 0x101019c:
-                $resName = "thicknessRatio";
-                break;
-            case 0x101019d:
-                $resName = "startColor";
-                break;
-            case 0x101019e:
-                $resName = "endColor";
-                break;
-            case 0x101019f:
-                $resName = "useLevel";
-                break;
-            case 0x10101a0:
-                $resName = "angle";
-                break;
-            case 0x10101a1:
-                $resName = "type";
-                break;
-            case 0x10101a2:
-                $resName = "centerX";
-                break;
-            case 0x10101a3:
-                $resName = "centerY";
-                break;
-            case 0x10101a4:
-                $resName = "gradientRadius";
-                break;
-            case 0x10101a5:
-                $resName = "color";
-                break;
-            case 0x10101a6:
-                $resName = "dashWidth";
-                break;
-            case 0x10101a7:
-                $resName = "dashGap";
-                break;
-            case 0x10101a8:
-                $resName = "radius";
-                break;
-            case 0x10101a9:
-                $resName = "topLeftRadius";
-                break;
-            case 0x10101aa:
-                $resName = "topRightRadius";
-                break;
-            case 0x10101ab:
-                $resName = "bottomLeftRadius";
-                break;
-            case 0x10101ac:
-                $resName = "bottomRightRadius";
-                break;
-            case 0x10101ad:
-                $resName = "left";
-                break;
-            case 0x10101ae:
-                $resName = "top";
-                break;
-            case 0x10101af:
-                $resName = "right";
-                break;
-            case 0x10101b0:
-                $resName = "bottom";
-                break;
-            case 0x10101b1:
-                $resName = "minLevel";
-                break;
-            case 0x10101b2:
-                $resName = "maxLevel";
-                break;
-            case 0x10101b3:
-                $resName = "fromDegrees";
-                break;
-            case 0x10101b4:
-                $resName = "toDegrees";
-                break;
-            case 0x10101b5:
-                $resName = "pivotX";
-                break;
-            case 0x10101b6:
-                $resName = "pivotY";
-                break;
-            case 0x10101b7:
-                $resName = "insetLeft";
-                break;
-            case 0x10101b8:
-                $resName = "insetRight";
-                break;
-            case 0x10101b9:
-                $resName = "insetTop";
-                break;
-            case 0x10101ba:
-                $resName = "insetBottom";
-                break;
-            case 0x10101bb:
-                $resName = "shareInterpolator";
-                break;
-            case 0x10101bc:
-                $resName = "fillBefore";
-                break;
-            case 0x10101bd:
-                $resName = "fillAfter";
-                break;
-            case 0x10101be:
-                $resName = "startOffset";
-                break;
-            case 0x10101bf:
-                $resName = "repeatCount";
-                break;
-            case 0x10101c0:
-                $resName = "repeatMode";
-                break;
-            case 0x10101c1:
-                $resName = "zAdjustment";
-                break;
-            case 0x10101c2:
-                $resName = "fromXScale";
-                break;
-            case 0x10101c3:
-                $resName = "toXScale";
-                break;
-            case 0x10101c4:
-                $resName = "fromYScale";
-                break;
-            case 0x10101c5:
-                $resName = "toYScale";
-                break;
-            case 0x10101c6:
-                $resName = "fromXDelta";
-                break;
-            case 0x10101c7:
-                $resName = "toXDelta";
-                break;
-            case 0x10101c8:
-                $resName = "fromYDelta";
-                break;
-            case 0x10101c9:
-                $resName = "toYDelta";
-                break;
-            case 0x10101ca:
-                $resName = "fromAlpha";
-                break;
-            case 0x10101cb:
-                $resName = "toAlpha";
-                break;
-            case 0x10101cc:
-                $resName = "delay";
-                break;
-            case 0x10101cd:
-                $resName = "animation";
-                break;
-            case 0x10101ce:
-                $resName = "animationOrder";
-                break;
-            case 0x10101cf:
-                $resName = "columnDelay";
-                break;
-            case 0x10101d0:
-                $resName = "rowDelay";
-                break;
-            case 0x10101d1:
-                $resName = "direction";
-                break;
-            case 0x10101d2:
-                $resName = "directionPriority";
-                break;
-            case 0x10101d3:
-                $resName = "factor";
-                break;
-            case 0x10101d4:
-                $resName = "cycles";
-                break;
-            case 0x10101d5:
-                $resName = "searchMode";
-                break;
-            case 0x10101d6:
-                $resName = "searchSuggestAuthority";
-                break;
-            case 0x10101d7:
-                $resName = "searchSuggestPath";
-                break;
-            case 0x10101d8:
-                $resName = "searchSuggestSelection";
-                break;
-            case 0x10101d9:
-                $resName = "searchSuggestIntentAction";
-                break;
-            case 0x10101da:
-                $resName = "searchSuggestIntentData";
-                break;
-            case 0x10101db:
-                $resName = "queryActionMsg";
-                break;
-            case 0x10101dc:
-                $resName = "suggestActionMsg";
-                break;
-            case 0x10101dd:
-                $resName = "suggestActionMsgColumn";
-                break;
-            case 0x10101de:
-                $resName = "menuCategory";
-                break;
-            case 0x10101df:
-                $resName = "orderInCategory";
-                break;
-            case 0x10101e0:
-                $resName = "checkableBehavior";
-                break;
-            case 0x10101e1:
-                $resName = "title";
-                break;
-            case 0x10101e2:
-                $resName = "titleCondensed";
-                break;
-            case 0x10101e3:
-                $resName = "alphabeticShortcut";
-                break;
-            case 0x10101e4:
-                $resName = "numericShortcut";
-                break;
-            case 0x10101e5:
-                $resName = "checkable";
-                break;
-            case 0x10101e6:
-                $resName = "selectable";
-                break;
-            case 0x10101e7:
-                $resName = "orderingFromXml";
-                break;
-            case 0x10101e8:
-                $resName = "key";
-                break;
-            case 0x10101e9:
-                $resName = "summary";
-                break;
-            case 0x10101ea:
-                $resName = "order";
-                break;
-            case 0x10101eb:
-                $resName = "widgetLayout";
-                break;
-            case 0x10101ec:
-                $resName = "dependency";
-                break;
-            case 0x10101ed:
-                $resName = "defaultValue";
-                break;
-            case 0x10101ee:
-                $resName = "shouldDisableView";
-                break;
-            case 0x10101ef:
-                $resName = "summaryOn";
-                break;
-            case 0x10101f0:
-                $resName = "summaryOff";
-                break;
-            case 0x10101f1:
-                $resName = "disableDependentsState";
-                break;
-            case 0x10101f2:
-                $resName = "dialogTitle";
-                break;
-            case 0x10101f3:
-                $resName = "dialogMessage";
-                break;
-            case 0x10101f4:
-                $resName = "dialogIcon";
-                break;
-            case 0x10101f5:
-                $resName = "positiveButtonText";
-                break;
-            case 0x10101f6:
-                $resName = "negativeButtonText";
-                break;
-            case 0x10101f7:
-                $resName = "dialogLayout";
-                break;
-            case 0x10101f8:
-                $resName = "entryValues";
-                break;
-            case 0x10101f9:
-                $resName = "ringtoneType";
-                break;
-            case 0x10101fa:
-                $resName = "showDefault";
-                break;
-            case 0x10101fb:
-                $resName = "showSilent";
-                break;
-            case 0x10101fc:
-                $resName = "scaleWidth";
-                break;
-            case 0x10101fd:
-                $resName = "scaleHeight";
-                break;
-            case 0x10101fe:
-                $resName = "scaleGravity";
-                break;
-            case 0x10101ff:
-                $resName = "ignoreGravity";
-                break;
-            case 0x1010200:
-                $resName = "foregroundGravity";
-                break;
-            case 0x1010201:
-                $resName = "tileMode";
-                break;
-            case 0x1010202:
-                $resName = "targetActivity";
-                break;
-            case 0x1010203:
-                $resName = "alwaysRetainTaskState";
-                break;
-            case 0x1010204:
-                $resName = "allowTaskReparenting";
-                break;
-            case 0x1010205:
-                $resName = "field public static final deprecated int searchButtonText";
-                break;
-            case 0x1010206:
-                $resName = "colorForegroundInverse";
-                break;
-            case 0x1010207:
-                $resName = "textAppearanceButton";
-                break;
-            case 0x1010208:
-                $resName = "listSeparatorTextViewStyle";
-                break;
-            case 0x1010209:
-                $resName = "streamType";
-                break;
-            case 0x101020a:
-                $resName = "clipOrientation";
-                break;
-            case 0x101020b:
-                $resName = "centerColor";
-                break;
-            case 0x101020c:
-                $resName = "minSdkVersion";
-                break;
-            case 0x101020d:
-                $resName = "windowFullscreen";
-                break;
-            case 0x101020e:
-                $resName = "unselectedAlpha";
-                break;
-            case 0x101020f:
-                $resName = "progressBarStyleSmallTitle";
-                break;
-            case 0x1010210:
-                $resName = "ratingBarStyleIndicator";
-                break;
-            case 0x1010211:
-                $resName = "apiKey";
-                break;
-            case 0x1010212:
-                $resName = "textColorTertiary";
-                break;
-            case 0x1010213:
-                $resName = "textColorTertiaryInverse";
-                break;
-            case 0x1010214:
-                $resName = "listDivider";
-                break;
-            case 0x1010215:
-                $resName = "soundEffectsEnabled";
-                break;
-            case 0x1010216:
-                $resName = "keepScreenOn";
-                break;
-            case 0x1010217:
-                $resName = "lineSpacingExtra";
-                break;
-            case 0x1010218:
-                $resName = "lineSpacingMultiplier";
-                break;
-            case 0x1010219:
-                $resName = "listChoiceIndicatorSingle";
-                break;
-            case 0x101021a:
-                $resName = "listChoiceIndicatorMultiple";
-                break;
-            case 0x101021b:
-                $resName = "versionCode";
-                break;
-            case 0x101021c:
-                $resName = "versionName";
-                break;
-            case 0x101021d:
-                $resName = "marqueeRepeatLimit";
-                break;
-            case 0x101021e:
-                $resName = "windowNoDisplay";
-                break;
-            case 0x101021f:
-                $resName = "backgroundDimEnabled";
-                break;
-            case 0x1010220:
-                $resName = "inputType";
-                break;
-            case 0x1010221:
-                $resName = "isDefault";
-                break;
-            case 0x1010222:
-                $resName = "windowDisablePreview";
-                break;
-            case 0x1010223:
-                $resName = "privateImeOptions";
-                break;
-            case 0x1010224:
-                $resName = "editorExtras";
-                break;
-            case 0x1010225:
-                $resName = "settingsActivity";
-                break;
-            case 0x1010226:
-                $resName = "fastScrollEnabled";
-                break;
-            case 0x1010227:
-                $resName = "reqTouchScreen";
-                break;
-            case 0x1010228:
-                $resName = "reqKeyboardType";
-                break;
-            case 0x1010229:
-                $resName = "reqHardKeyboard";
-                break;
-            case 0x101022a:
-                $resName = "reqNavigation";
-                break;
-            case 0x101022b:
-                $resName = "windowSoftInputMode";
-                break;
-            case 0x101022c:
-                $resName = "imeFullscreenBackground";
-                break;
-            case 0x101022d:
-                $resName = "noHistory";
-                break;
-            case 0x101022e:
-                $resName = "headerDividersEnabled";
-                break;
-            case 0x101022f:
-                $resName = "footerDividersEnabled";
-                break;
-            case 0x1010230:
-                $resName = "candidatesTextStyleSpans";
-                break;
-            case 0x1010231:
-                $resName = "smoothScrollbar";
-                break;
-            case 0x1010232:
-                $resName = "reqFiveWayNav";
-                break;
-            case 0x1010233:
-                $resName = "keyBackground";
-                break;
-            case 0x1010234:
-                $resName = "keyTextSize";
-                break;
-            case 0x1010235:
-                $resName = "labelTextSize";
-                break;
-            case 0x1010236:
-                $resName = "keyTextColor";
-                break;
-            case 0x1010237:
-                $resName = "keyPreviewLayout";
-                break;
-            case 0x1010238:
-                $resName = "keyPreviewOffset";
-                break;
-            case 0x1010239:
-                $resName = "keyPreviewHeight";
-                break;
-            case 0x101023a:
-                $resName = "verticalCorrection";
-                break;
-            case 0x101023b:
-                $resName = "popupLayout";
-                break;
-            case 0x101023c:
-                $resName = "state_long_pressable";
-                break;
-            case 0x101023d:
-                $resName = "keyWidth";
-                break;
-            case 0x101023e:
-                $resName = "keyHeight";
-                break;
-            case 0x101023f:
-                $resName = "horizontalGap";
-                break;
-            case 0x1010240:
-                $resName = "verticalGap";
-                break;
-            case 0x1010241:
-                $resName = "rowEdgeFlags";
-                break;
-            case 0x1010242:
-                $resName = "codes";
-                break;
-            case 0x1010243:
-                $resName = "popupKeyboard";
-                break;
-            case 0x1010244:
-                $resName = "popupCharacters";
-                break;
-            case 0x1010245:
-                $resName = "keyEdgeFlags";
-                break;
-            case 0x1010246:
-                $resName = "isModifier";
-                break;
-            case 0x1010247:
-                $resName = "isSticky";
-                break;
-            case 0x1010248:
-                $resName = "isRepeatable";
-                break;
-            case 0x1010249:
-                $resName = "iconPreview";
-                break;
-            case 0x101024a:
-                $resName = "keyOutputText";
-                break;
-            case 0x101024b:
-                $resName = "keyLabel";
-                break;
-            case 0x101024c:
-                $resName = "keyIcon";
-                break;
-            case 0x101024d:
-                $resName = "keyboardMode";
-                break;
-            case 0x101024e:
-                $resName = "isScrollContainer";
-                break;
-            case 0x101024f:
-                $resName = "fillEnabled";
-                break;
-            case 0x1010250:
-                $resName = "updatePeriodMillis";
-                break;
-            case 0x1010251:
-                $resName = "initialLayout";
-                break;
-            case 0x1010252:
-                $resName = "voiceSearchMode";
-                break;
-            case 0x1010253:
-                $resName = "voiceLanguageModel";
-                break;
-            case 0x1010254:
-                $resName = "voicePromptText";
-                break;
-            case 0x1010255:
-                $resName = "voiceLanguage";
-                break;
-            case 0x1010256:
-                $resName = "voiceMaxResults";
-                break;
-            case 0x1010257:
-                $resName = "bottomOffset";
-                break;
-            case 0x1010258:
-                $resName = "topOffset";
-                break;
-            case 0x1010259:
-                $resName = "allowSingleTap";
-                break;
-            case 0x101025a:
-                $resName = "handle";
-                break;
-            case 0x101025b:
-                $resName = "content";
-                break;
-            case 0x101025c:
-                $resName = "animateOnClick";
-                break;
-            case 0x101025d:
-                $resName = "configure";
-                break;
-            case 0x101025e:
-                $resName = "hapticFeedbackEnabled";
-                break;
-            case 0x101025f:
-                $resName = "innerRadius";
-                break;
-            case 0x1010260:
-                $resName = "thickness";
-                break;
-            case 0x1010261:
-                $resName = "sharedUserLabel";
-                break;
-            case 0x1010262:
-                $resName = "dropDownWidth";
-                break;
-            case 0x1010263:
-                $resName = "dropDownAnchor";
-                break;
-            case 0x1010264:
-                $resName = "imeOptions";
-                break;
-            case 0x1010265:
-                $resName = "imeActionLabel";
-                break;
-            case 0x1010266:
-                $resName = "imeActionId";
-                break;
-            case 0x1010268:
-                $resName = "imeExtractEnterAnimation";
-                break;
-            case 0x1010269:
-                $resName = "imeExtractExitAnimation";
-                break;
-            case 0x101026a:
-                $resName = "tension";
-                break;
-            case 0x101026b:
-                $resName = "extraTension";
-                break;
-            case 0x101026c:
-                $resName = "anyDensity";
-                break;
-            case 0x101026d:
-                $resName = "searchSuggestThreshold";
-                break;
-            case 0x101026e:
-                $resName = "includeInGlobalSearch";
-                break;
-            case 0x101026f:
-                $resName = "onClick";
-                break;
-            case 0x1010270:
-                $resName = "targetSdkVersion";
-                break;
-            case 0x1010271:
-                $resName = "maxSdkVersion";
-                break;
-            case 0x1010272:
-                $resName = "testOnly";
-                break;
-            case 0x1010273:
-                $resName = "contentDescription";
-                break;
-            case 0x1010274:
-                $resName = "gestureStrokeWidth";
-                break;
-            case 0x1010275:
-                $resName = "gestureColor";
-                break;
-            case 0x1010276:
-                $resName = "uncertainGestureColor";
-                break;
-            case 0x1010277:
-                $resName = "fadeOffset";
-                break;
-            case 0x1010278:
-                $resName = "fadeDuration";
-                break;
-            case 0x1010279:
-                $resName = "gestureStrokeType";
-                break;
-            case 0x101027a:
-                $resName = "gestureStrokeLengthThreshold";
-                break;
-            case 0x101027b:
-                $resName = "gestureStrokeSquarenessThreshold";
-                break;
-            case 0x101027c:
-                $resName = "gestureStrokeAngleThreshold";
-                break;
-            case 0x101027d:
-                $resName = "eventsInterceptionEnabled";
-                break;
-            case 0x101027e:
-                $resName = "fadeEnabled";
-                break;
-            case 0x101027f:
-                $resName = "backupAgent";
-                break;
-            case 0x1010280:
-                $resName = "allowBackup";
-                break;
-            case 0x1010281:
-                $resName = "glEsVersion";
-                break;
-            case 0x1010282:
-                $resName = "queryAfterZeroResults";
-                break;
-            case 0x1010283:
-                $resName = "dropDownHeight";
-                break;
-            case 0x1010284:
-                $resName = "smallScreens";
-                break;
-            case 0x1010285:
-                $resName = "normalScreens";
-                break;
-            case 0x1010286:
-                $resName = "largeScreens";
-                break;
-            case 0x1010287:
-                $resName = "progressBarStyleInverse";
-                break;
-            case 0x1010288:
-                $resName = "progressBarStyleSmallInverse";
-                break;
-            case 0x1010289:
-                $resName = "progressBarStyleLargeInverse";
-                break;
-            case 0x101028a:
-                $resName = "searchSettingsDescription";
-                break;
-            case 0x101028b:
-                $resName = "textColorPrimaryInverseDisableOnly";
-                break;
-            case 0x101028c:
-                $resName = "autoUrlDetect";
-                break;
-            case 0x101028d:
-                $resName = "resizeable";
-                break;
-            case 0x101028e:
-                $resName = "required";
-                break;
-            case 0x101028f:
-                $resName = "accountType";
-                break;
-            case 0x1010290:
-                $resName = "contentAuthority";
-                break;
-            case 0x1010291:
-                $resName = "userVisible";
-                break;
-            case 0x1010292:
-                $resName = "windowShowWallpaper";
-                break;
-            case 0x1010293:
-                $resName = "wallpaperOpenEnterAnimation";
-                break;
-            case 0x1010294:
-                $resName = "wallpaperOpenExitAnimation";
-                break;
-            case 0x1010295:
-                $resName = "wallpaperCloseEnterAnimation";
-                break;
-            case 0x1010296:
-                $resName = "wallpaperCloseExitAnimation";
-                break;
-            case 0x1010297:
-                $resName = "wallpaperIntraOpenEnterAnimation";
-                break;
-            case 0x1010298:
-                $resName = "wallpaperIntraOpenExitAnimation";
-                break;
-            case 0x1010299:
-                $resName = "wallpaperIntraCloseEnterAnimation";
-                break;
-            case 0x101029a:
-                $resName = "wallpaperIntraCloseExitAnimation";
-                break;
-            case 0x101029b:
-                $resName = "supportsUploading";
-                break;
-            case 0x101029c:
-                $resName = "killAfterRestore";
-                break;
-            case 0x101029d:
-                $resName = "field public static final deprecated int restoreNeedsApplication";
-                break;
-            case 0x101029e:
-                $resName = "smallIcon";
-                break;
-            case 0x101029f:
-                $resName = "accountPreferences";
-                break;
-            case 0x10102a0:
-                $resName = "textAppearanceSearchResultSubtitle";
-                break;
-            case 0x10102a1:
-                $resName = "textAppearanceSearchResultTitle";
-                break;
-            case 0x10102a2:
-                $resName = "summaryColumn";
-                break;
-            case 0x10102a3:
-                $resName = "detailColumn";
-                break;
-            case 0x10102a4:
-                $resName = "detailSocialSummary";
-                break;
-            case 0x10102a5:
-                $resName = "thumbnail";
-                break;
-            case 0x10102a6:
-                $resName = "detachWallpaper";
-                break;
-            case 0x10102a7:
-                $resName = "finishOnCloseSystemDialogs";
-                break;
-            case 0x10102a8:
-                $resName = "scrollbarFadeDuration";
-                break;
-            case 0x10102a9:
-                $resName = "scrollbarDefaultDelayBeforeFade";
-                break;
-            case 0x10102aa:
-                $resName = "fadeScrollbars";
-                break;
-            case 0x10102ab:
-                $resName = "colorBackgroundCacheHint";
-                break;
-            case 0x10102ac:
-                $resName = "dropDownHorizontalOffset";
-                break;
-            case 0x10102ad:
-                $resName = "dropDownVerticalOffset";
-                break;
-            case 0x10102ae:
-                $resName = "quickContactBadgeStyleWindowSmall";
-                break;
-            case 0x10102af:
-                $resName = "quickContactBadgeStyleWindowMedium";
-                break;
-            case 0x10102b0:
-                $resName = "quickContactBadgeStyleWindowLarge";
-                break;
-            case 0x10102b1:
-                $resName = "quickContactBadgeStyleSmallWindowSmall";
-                break;
-            case 0x10102b2:
-                $resName = "quickContactBadgeStyleSmallWindowMedium";
-                break;
-            case 0x10102b3:
-                $resName = "quickContactBadgeStyleSmallWindowLarge";
-                break;
-            case 0x10102b4:
-                $resName = "author";
-                break;
-            case 0x10102b5:
-                $resName = "autoStart";
-                break;
-            case 0x10102b6:
-                $resName = "expandableListViewWhiteStyle";
-                break;
-            case 0x10102b7:
-                $resName = "installLocation";
-                break;
-            case 0x10102b8:
-                $resName = "vmSafeMode";
-                break;
-            case 0x10102b9:
-                $resName = "webTextViewStyle";
-                break;
-            case 0x10102ba:
-                $resName = "restoreAnyVersion";
-                break;
-            case 0x10102bb:
-                $resName = "tabStripLeft";
-                break;
-            case 0x10102bc:
-                $resName = "tabStripRight";
-                break;
-            case 0x10102bd:
-                $resName = "tabStripEnabled";
-                break;
-            case 0x10102be:
-                $resName = "logo";
-                break;
-            case 0x10102bf:
-                $resName = "xlargeScreens";
-                break;
-            case 0x10102c0:
-                $resName = "immersive";
-                break;
-            case 0x10102c1:
-                $resName = "overScrollMode";
-                break;
-            case 0x10102c2:
-                $resName = "overScrollHeader";
-                break;
-            case 0x10102c3:
-                $resName = "overScrollFooter";
-                break;
-            case 0x10102c4:
-                $resName = "filterTouchesWhenObscured";
-                break;
-            case 0x10102c5:
-                $resName = "textSelectHandleLeft";
-                break;
-            case 0x10102c6:
-                $resName = "textSelectHandleRight";
-                break;
-            case 0x10102c7:
-                $resName = "textSelectHandle";
-                break;
-            case 0x10102c8:
-                $resName = "textSelectHandleWindowStyle";
-                break;
-            case 0x10102c9:
-                $resName = "popupAnimationStyle";
-                break;
-            case 0x10102ca:
-                $resName = "screenSize";
-                break;
-            case 0x10102cb:
-                $resName = "screenDensity";
-                break;
-            case 0x10102cc:
-                $resName = "allContactsName";
-                break;
-            case 0x10102cd:
-                $resName = "windowActionBar";
-                break;
-            case 0x10102ce:
-                $resName = "actionBarStyle";
-                break;
-            case 0x10102cf:
-                $resName = "navigationMode";
-                break;
-            case 0x10102d0:
-                $resName = "displayOptions";
-                break;
-            case 0x10102d1:
-                $resName = "subtitle";
-                break;
-            case 0x10102d2:
-                $resName = "customNavigationLayout";
-                break;
-            case 0x10102d3:
-                $resName = "hardwareAccelerated";
-                break;
-            case 0x10102d4:
-                $resName = "measureWithLargestChild";
-                break;
-            case 0x10102d5:
-                $resName = "animateFirstView";
-                break;
-            case 0x10102d6:
-                $resName = "dropDownSpinnerStyle";
-                break;
-            case 0x10102d7:
-                $resName = "actionDropDownStyle";
-                break;
-            case 0x10102d8:
-                $resName = "actionButtonStyle";
-                break;
-            case 0x10102d9:
-                $resName = "showAsAction";
-                break;
-            case 0x10102da:
-                $resName = "previewImage";
-                break;
-            case 0x10102db:
-                $resName = "actionModeBackground";
-                break;
-            case 0x10102dc:
-                $resName = "actionModeCloseDrawable";
-                break;
-            case 0x10102dd:
-                $resName = "windowActionModeOverlay";
-                break;
-            case 0x10102de:
-                $resName = "valueFrom";
-                break;
-            case 0x10102df:
-                $resName = "valueTo";
-                break;
-            case 0x10102e0:
-                $resName = "valueType";
-                break;
-            case 0x10102e1:
-                $resName = "propertyName";
-                break;
-            case 0x10102e2:
-                $resName = "ordering";
-                break;
-            case 0x10102e3:
-                $resName = "fragment";
-                break;
-            case 0x10102e4:
-                $resName = "windowActionBarOverlay";
-                break;
-            case 0x10102e5:
-                $resName = "fragmentOpenEnterAnimation";
-                break;
-            case 0x10102e6:
-                $resName = "fragmentOpenExitAnimation";
-                break;
-            case 0x10102e7:
-                $resName = "fragmentCloseEnterAnimation";
-                break;
-            case 0x10102e8:
-                $resName = "fragmentCloseExitAnimation";
-                break;
-            case 0x10102e9:
-                $resName = "fragmentFadeEnterAnimation";
-                break;
-            case 0x10102ea:
-                $resName = "fragmentFadeExitAnimation";
-                break;
-            case 0x10102eb:
-                $resName = "actionBarSize";
-                break;
-            case 0x10102ec:
-                $resName = "imeSubtypeLocale";
-                break;
-            case 0x10102ed:
-                $resName = "imeSubtypeMode";
-                break;
-            case 0x10102ee:
-                $resName = "imeSubtypeExtraValue";
-                break;
-            case 0x10102ef:
-                $resName = "splitMotionEvents";
-                break;
-            case 0x10102f0:
-                $resName = "listChoiceBackgroundIndicator";
-                break;
-            case 0x10102f1:
-                $resName = "spinnerMode";
-                break;
-            case 0x10102f2:
-                $resName = "animateLayoutChanges";
-                break;
-            case 0x10102f3:
-                $resName = "actionBarTabStyle";
-                break;
-            case 0x10102f4:
-                $resName = "actionBarTabBarStyle";
-                break;
-            case 0x10102f5:
-                $resName = "actionBarTabTextStyle";
-                break;
-            case 0x10102f6:
-                $resName = "actionOverflowButtonStyle";
-                break;
-            case 0x10102f7:
-                $resName = "actionModeCloseButtonStyle";
-                break;
-            case 0x10102f8:
-                $resName = "titleTextStyle";
-                break;
-            case 0x10102f9:
-                $resName = "subtitleTextStyle";
-                break;
-            case 0x10102fa:
-                $resName = "iconifiedByDefault";
-                break;
-            case 0x10102fb:
-                $resName = "actionLayout";
-                break;
-            case 0x10102fc:
-                $resName = "actionViewClass";
-                break;
-            case 0x10102fd:
-                $resName = "activatedBackgroundIndicator";
-                break;
-            case 0x10102fe:
-                $resName = "state_activated";
-                break;
-            case 0x10102ff:
-                $resName = "listPopupWindowStyle";
-                break;
-            case 0x1010300:
-                $resName = "popupMenuStyle";
-                break;
-            case 0x1010301:
-                $resName = "textAppearanceLargePopupMenu";
-                break;
-            case 0x1010302:
-                $resName = "textAppearanceSmallPopupMenu";
-                break;
-            case 0x1010303:
-                $resName = "breadCrumbTitle";
-                break;
-            case 0x1010304:
-                $resName = "breadCrumbShortTitle";
-                break;
-            case 0x1010305:
-                $resName = "listDividerAlertDialog";
-                break;
-            case 0x1010306:
-                $resName = "textColorAlertDialogListItem";
-                break;
-            case 0x1010307:
-                $resName = "loopViews";
-                break;
-            case 0x1010308:
-                $resName = "dialogTheme";
-                break;
-            case 0x1010309:
-                $resName = "alertDialogTheme";
-                break;
-            case 0x101030a:
-                $resName = "dividerVertical";
-                break;
-            case 0x101030b:
-                $resName = "homeAsUpIndicator";
-                break;
-            case 0x101030c:
-                $resName = "enterFadeDuration";
-                break;
-            case 0x101030d:
-                $resName = "exitFadeDuration";
-                break;
-            case 0x101030e:
-                $resName = "selectableItemBackground";
-                break;
-            case 0x101030f:
-                $resName = "autoAdvanceViewId";
-                break;
-            case 0x1010310:
-                $resName = "useIntrinsicSizeAsMinimum";
-                break;
-            case 0x1010311:
-                $resName = "actionModeCutDrawable";
-                break;
-            case 0x1010312:
-                $resName = "actionModeCopyDrawable";
-                break;
-            case 0x1010313:
-                $resName = "actionModePasteDrawable";
-                break;
-            case 0x1010314:
-                $resName = "textEditPasteWindowLayout";
-                break;
-            case 0x1010315:
-                $resName = "textEditNoPasteWindowLayout";
-                break;
-            case 0x1010316:
-                $resName = "textIsSelectable";
-                break;
-            case 0x1010317:
-                $resName = "windowEnableSplitTouch";
-                break;
-            case 0x1010318:
-                $resName = "indeterminateProgressStyle";
-                break;
-            case 0x1010319:
-                $resName = "progressBarPadding";
-                break;
-            case 0x101031a:
-                $resName = "field public static final deprecated int animationResolution";
-                break;
-            case 0x101031b:
-                $resName = "state_accelerated";
-                break;
-            case 0x101031c:
-                $resName = "baseline";
-                break;
-            case 0x101031d:
-                $resName = "homeLayout";
-                break;
-            case 0x101031e:
-                $resName = "opacity";
-                break;
-            case 0x101031f:
-                $resName = "alpha";
-                break;
-            case 0x1010320:
-                $resName = "transformPivotX";
-                break;
-            case 0x1010321:
-                $resName = "transformPivotY";
-                break;
-            case 0x1010322:
-                $resName = "translationX";
-                break;
-            case 0x1010323:
-                $resName = "translationY";
-                break;
-            case 0x1010324:
-                $resName = "scaleX";
-                break;
-            case 0x1010325:
-                $resName = "scaleY";
-                break;
-            case 0x1010326:
-                $resName = "rotation";
-                break;
-            case 0x1010327:
-                $resName = "rotationX";
-                break;
-            case 0x1010328:
-                $resName = "rotationY";
-                break;
-            case 0x1010329:
-                $resName = "showDividers";
-                break;
-            case 0x101032a:
-                $resName = "dividerPadding";
-                break;
-            case 0x101032b:
-                $resName = "borderlessButtonStyle";
-                break;
-            case 0x101032c:
-                $resName = "dividerHorizontal";
-                break;
-            case 0x101032d:
-                $resName = "itemPadding";
-                break;
-            case 0x101032e:
-                $resName = "buttonBarStyle";
-                break;
-            case 0x101032f:
-                $resName = "buttonBarButtonStyle";
-                break;
-            case 0x1010330:
-                $resName = "segmentedButtonStyle";
-                break;
-            case 0x1010331:
-                $resName = "staticWallpaperPreview";
-                break;
-            case 0x1010332:
-                $resName = "allowParallelSyncs";
-                break;
-            case 0x1010333:
-                $resName = "isAlwaysSyncable";
-                break;
-            case 0x1010334:
-                $resName = "verticalScrollbarPosition";
-                break;
-            case 0x1010335:
-                $resName = "fastScrollAlwaysVisible";
-                break;
-            case 0x1010336:
-                $resName = "fastScrollThumbDrawable";
-                break;
-            case 0x1010337:
-                $resName = "fastScrollPreviewBackgroundLeft";
-                break;
-            case 0x1010338:
-                $resName = "fastScrollPreviewBackgroundRight";
-                break;
-            case 0x1010339:
-                $resName = "fastScrollTrackDrawable";
-                break;
-            case 0x101033a:
-                $resName = "fastScrollOverlayPosition";
-                break;
-            case 0x101033b:
-                $resName = "customTokens";
-                break;
-            case 0x101033c:
-                $resName = "nextFocusForward";
-                break;
-            case 0x101033d:
-                $resName = "firstDayOfWeek";
-                break;
-            case 0x101033e:
-                $resName = "showWeekNumber";
-                break;
-            case 0x101033f:
-                $resName = "minDate";
-                break;
-            case 0x1010340:
-                $resName = "maxDate";
-                break;
-            case 0x1010341:
-                $resName = "shownWeekCount";
-                break;
-            case 0x1010342:
-                $resName = "selectedWeekBackgroundColor";
-                break;
-            case 0x1010343:
-                $resName = "focusedMonthDateColor";
-                break;
-            case 0x1010344:
-                $resName = "unfocusedMonthDateColor";
-                break;
-            case 0x1010345:
-                $resName = "weekNumberColor";
-                break;
-            case 0x1010346:
-                $resName = "weekSeparatorLineColor";
-                break;
-            case 0x1010347:
-                $resName = "selectedDateVerticalBar";
-                break;
-            case 0x1010348:
-                $resName = "weekDayTextAppearance";
-                break;
-            case 0x1010349:
-                $resName = "dateTextAppearance";
-                break;
-            case 0x101034b:
-                $resName = "spinnersShown";
-                break;
-            case 0x101034c:
-                $resName = "calendarViewShown";
-                break;
-            case 0x101034d:
-                $resName = "state_multiline";
-                break;
-            case 0x101034e:
-                $resName = "detailsElementBackground";
-                break;
-            case 0x101034f:
-                $resName = "textColorHighlightInverse";
-                break;
-            case 0x1010350:
-                $resName = "textColorLinkInverse";
-                break;
-            case 0x1010351:
-                $resName = "editTextColor";
-                break;
-            case 0x1010352:
-                $resName = "editTextBackground";
-                break;
-            case 0x1010353:
-                $resName = "horizontalScrollViewStyle";
-                break;
-            case 0x1010354:
-                $resName = "layerType";
-                break;
-            case 0x1010355:
-                $resName = "alertDialogIcon";
-                break;
-            case 0x1010356:
-                $resName = "windowMinWidthMajor";
-                break;
-            case 0x1010357:
-                $resName = "windowMinWidthMinor";
-                break;
-            case 0x1010358:
-                $resName = "queryHint";
-                break;
-            case 0x1010359:
-                $resName = "fastScrollTextColor";
-                break;
-            case 0x101035a:
-                $resName = "largeHeap";
-                break;
-            case 0x101035b:
-                $resName = "windowCloseOnTouchOutside";
-                break;
-            case 0x101035c:
-                $resName = "datePickerStyle";
-                break;
-            case 0x101035d:
-                $resName = "calendarViewStyle";
-                break;
-            case 0x101035e:
-                $resName = "textEditSidePasteWindowLayout";
-                break;
-            case 0x101035f:
-                $resName = "textEditSideNoPasteWindowLayout";
-                break;
-            case 0x1010360:
-                $resName = "actionMenuTextAppearance";
-                break;
-            case 0x1010361:
-                $resName = "actionMenuTextColor";
-                break;
-            case 0x1010362:
-                $resName = "textCursorDrawable";
-                break;
-            case 0x1010363:
-                $resName = "resizeMode";
-                break;
-            case 0x1010364:
-                $resName = "requiresSmallestWidthDp";
-                break;
-            case 0x1010365:
-                $resName = "compatibleWidthLimitDp";
-                break;
-            case 0x1010366:
-                $resName = "largestWidthLimitDp";
-                break;
-            case 0x1010367:
-                $resName = "state_hovered";
-                break;
-            case 0x1010368:
-                $resName = "state_drag_can_accept";
-                break;
-            case 0x1010369:
-                $resName = "state_drag_hovered";
-                break;
-            case 0x101036a:
-                $resName = "stopWithTask";
-                break;
-            case 0x101036b:
-                $resName = "switchTextOn";
-                break;
-            case 0x101036c:
-                $resName = "switchTextOff";
-                break;
-            case 0x101036d:
-                $resName = "switchPreferenceStyle";
-                break;
-            case 0x101036e:
-                $resName = "switchTextAppearance";
-                break;
-            case 0x101036f:
-                $resName = "track";
-                break;
-            case 0x1010370:
-                $resName = "switchMinWidth";
-                break;
-            case 0x1010371:
-                $resName = "switchPadding";
-                break;
-            case 0x1010372:
-                $resName = "thumbTextPadding";
-                break;
-            case 0x1010373:
-                $resName = "textSuggestionsWindowStyle";
-                break;
-            case 0x1010374:
-                $resName = "textEditSuggestionItemLayout";
-                break;
-            case 0x1010375:
-                $resName = "rowCount";
-                break;
-            case 0x1010376:
-                $resName = "rowOrderPreserved";
-                break;
-            case 0x1010377:
-                $resName = "columnCount";
-                break;
-            case 0x1010378:
-                $resName = "columnOrderPreserved";
-                break;
-            case 0x1010379:
-                $resName = "useDefaultMargins";
-                break;
-            case 0x101037a:
-                $resName = "alignmentMode";
-                break;
-            case 0x101037b:
-                $resName = "layout_row";
-                break;
-            case 0x101037c:
-                $resName = "layout_rowSpan";
-                break;
-            case 0x101037d:
-                $resName = "layout_columnSpan";
-                break;
-            case 0x101037e:
-                $resName = "actionModeSelectAllDrawable";
-                break;
-            case 0x101037f:
-                $resName = "isAuxiliary";
-                break;
-            case 0x1010380:
-                $resName = "accessibilityEventTypes";
-                break;
-            case 0x1010381:
-                $resName = "packageNames";
-                break;
-            case 0x1010382:
-                $resName = "accessibilityFeedbackType";
-                break;
-            case 0x1010383:
-                $resName = "notificationTimeout";
-                break;
-            case 0x1010384:
-                $resName = "accessibilityFlags";
-                break;
-            case 0x1010385:
-                $resName = "canRetrieveWindowContent";
-                break;
-            case 0x1010386:
-                $resName = "listPreferredItemHeightLarge";
-                break;
-            case 0x1010387:
-                $resName = "listPreferredItemHeightSmall";
-                break;
-            case 0x1010388:
-                $resName = "actionBarSplitStyle";
-                break;
-            case 0x1010389:
-                $resName = "actionProviderClass";
-                break;
-            case 0x101038a:
-                $resName = "backgroundStacked";
-                break;
-            case 0x101038b:
-                $resName = "backgroundSplit";
-                break;
-            case 0x101038c:
-                $resName = "textAllCaps";
-                break;
-            case 0x101038d:
-                $resName = "colorPressedHighlight";
-                break;
-            case 0x101038e:
-                $resName = "colorLongPressedHighlight";
-                break;
-            case 0x101038f:
-                $resName = "colorFocusedHighlight";
-                break;
-            case 0x1010390:
-                $resName = "colorActivatedHighlight";
-                break;
-            case 0x1010391:
-                $resName = "colorMultiSelectHighlight";
-                break;
-            case 0x1010392:
-                $resName = "drawableStart";
-                break;
-            case 0x1010393:
-                $resName = "drawableEnd";
-                break;
-            case 0x1010394:
-                $resName = "actionModeStyle";
-                break;
-            case 0x1010395:
-                $resName = "minResizeWidth";
-                break;
-            case 0x1010396:
-                $resName = "minResizeHeight";
-                break;
-            case 0x1010397:
-                $resName = "actionBarWidgetTheme";
-                break;
-            case 0x1010398:
-                $resName = "uiOptions";
-                break;
-            case 0x1010399:
-                $resName = "subtypeLocale";
-                break;
-            case 0x101039a:
-                $resName = "subtypeExtraValue";
-                break;
-            case 0x101039b:
-                $resName = "actionBarDivider";
-                break;
-            case 0x101039c:
-                $resName = "actionBarItemBackground";
-                break;
-            case 0x101039d:
-                $resName = "actionModeSplitBackground";
-                break;
-            case 0x101039e:
-                $resName = "textAppearanceListItem";
-                break;
-            case 0x101039f:
-                $resName = "textAppearanceListItemSmall";
-                break;
-            case 0x10103a0:
-                $resName = "targetDescriptions";
-                break;
-            case 0x10103a1:
-                $resName = "directionDescriptions";
-                break;
-            case 0x10103a2:
-                $resName = "overridesImplicitlyEnabledSubtype";
-                break;
-            case 0x10103a3:
-                $resName = "listPreferredItemPaddingLeft";
-                break;
-            case 0x10103a4:
-                $resName = "listPreferredItemPaddingRight";
-                break;
-            case 0x10103a5:
-                $resName = "requiresFadingEdge";
-                break;
-            case 0x10103a6:
-                $resName = "publicKey";
-                break;
-            case 0x10103a7:
-                $resName = "parentActivityName";
-                break;
-            case 0x10103a9:
-                $resName = "isolatedProcess";
-                break;
-            case 0x10103aa:
-                $resName = "importantForAccessibility";
-                break;
-            case 0x10103ab:
-                $resName = "keyboardLayout";
-                break;
-            case 0x10103ac:
-                $resName = "fontFamily";
-                break;
-            case 0x10103ad:
-                $resName = "mediaRouteButtonStyle";
-                break;
-            case 0x10103ae:
-                $resName = "mediaRouteTypes";
-                break;
-            case 0x10103af:
-                $resName = "supportsRtl";
-                break;
-            case 0x10103b0:
-                $resName = "textDirection";
-                break;
-            case 0x10103b1:
-                $resName = "textAlignment";
-                break;
-            case 0x10103b2:
-                $resName = "layoutDirection";
-                break;
-            case 0x10103b3:
-                $resName = "paddingStart";
-                break;
-            case 0x10103b4:
-                $resName = "paddingEnd";
-                break;
-            case 0x10103b5:
-                $resName = "layout_marginStart";
-                break;
-            case 0x10103b6:
-                $resName = "layout_marginEnd";
-                break;
-            case 0x10103b7:
-                $resName = "layout_toStartOf";
-                break;
-            case 0x10103b8:
-                $resName = "layout_toEndOf";
-                break;
-            case 0x10103b9:
-                $resName = "layout_alignStart";
-                break;
-            case 0x10103ba:
-                $resName = "layout_alignEnd";
-                break;
-            case 0x10103bb:
-                $resName = "layout_alignParentStart";
-                break;
-            case 0x10103bc:
-                $resName = "layout_alignParentEnd";
-                break;
-            case 0x10103bd:
-                $resName = "listPreferredItemPaddingStart";
-                break;
-            case 0x10103be:
-                $resName = "listPreferredItemPaddingEnd";
-                break;
-            case 0x10103bf:
-                $resName = "singleUser";
-                break;
-            case 0x10103c0:
-                $resName = "presentationTheme";
-                break;
-            case 0x10103c1:
-                $resName = "subtypeId";
-                break;
-            case 0x10103c2:
-                $resName = "initialKeyguardLayout";
-                break;
-            case 0x10103c4:
-                $resName = "widgetCategory";
-                break;
-            case 0x10103c5:
-                $resName = "permissionGroupFlags";
-                break;
-            case 0x10103c6:
-                $resName = "labelFor";
-                break;
-            case 0x10103c7:
-                $resName = "permissionFlags";
-                break;
-            case 0x10103c8:
-                $resName = "checkedTextViewStyle";
-                break;
-            case 0x10103c9:
-                $resName = "showOnLockScreen";
-                break;
-            case 0x10103ca:
-                $resName = "format12Hour";
-                break;
-            case 0x10103cb:
-                $resName = "format24Hour";
-                break;
-            case 0x10103cc:
-                $resName = "timeZone";
-                break;
-            default:
-                $resName = "0x" . dechex($id);
-        }
-        return $resName;
+        return self::$resourceMap[$id] ?? "0x" . dechex($id);
     }
 
-    /**
-     * @param $indent
-     * @param $str
-     */
     public function appendXmlIndent($indent, $str)
     {
         $this->appendXml(substr(self::$indent_spaces, 0, min($indent * 2, strlen(self::$indent_spaces))) . $str);
