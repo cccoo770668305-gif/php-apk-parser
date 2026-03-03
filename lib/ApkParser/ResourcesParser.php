@@ -122,37 +122,41 @@ class ResourcesParser
 
         $strings = array();
         for ($i = 0; $i < $stringsCount; $i++) {
-            $lastPosition = $data->position();
-            $pos = $stringsStart + $offsets[$i];
-            $data->seek($pos);
-            $len = $data->position();
-            $data->seek($lastPosition);
-            if ($len < 0) {
-                $data->readInt16LE(); // extendShort
-            }
-            $pos += 2;
+            $data->seek($stringsStart + $offsets[$i]);
 
-            $strings[$i] = '';
             if ($isUtf8) {
-                $length = 0;
-                $data->seek($pos);
-                while ($data->readByte() != 0) {
-                    $length++;
+                /**
+                 * Bolt: Use length-prefixes for bulk reads instead of byte-by-byte scanning.
+                 * Android UTF-8 strings have two length prefixes: UTF-16 length and UTF-8 length.
+                 */
+                $u16len = $data->readByte();
+                if ($u16len & 0x80) {
+                    $data->readByte();
                 }
-                if ($length > 0) {
-                    $data->seek($pos);
-                    $strings[$i] = $data->read($length);
+
+                $u8len = $data->readByte();
+                if ($u8len & 0x80) {
+                    $u8len = (($u8len & 0x7F) << 8) | $data->readByte();
+                }
+
+                $strings[$i] = $u8len > 0 ? $data->read($u8len) : '';
+            } else {
+                /**
+                 * Bolt: Use length-prefixes and mb_convert_encoding for UTF-16LE strings.
+                 * This is significantly faster and more reliable than manual loops.
+                 */
+                $u16len = $data->readByte() | ($data->readByte() << 8);
+                if ($u16len & 0x8000) {
+                    $u16len = (($u16len & 0x7FFF) << 16) | ($data->readByte() | ($data->readByte() << 8));
+                }
+
+                if ($u16len > 0) {
+                    $bytes = $data->read($u16len * 2);
+                    $strings[$i] = mb_convert_encoding($bytes, 'UTF-8', 'UTF-16LE');
                 } else {
                     $strings[$i] = '';
                 }
-            } else {
-                $data->seek($pos);
-                while (($c = $data->read()) != 0) {
-                    $strings[$i] .= $c;
-                    $pos += 2;
-                }
             }
-            // echo 'Parsed value: ', $strings[$i], PHP_EOL;
         }
         return $strings;
     }
