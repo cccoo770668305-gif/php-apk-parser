@@ -300,13 +300,11 @@ class XmlParser
             $length = $val;
         }
 
-        $strEnd = $string_offset + ($length);
-        $string = "";
-        for ($i = $string_offset; $i < $strEnd; $i++) {
-            $string .= chr($arr[$i]);
-        }
-
-        return $string;
+        /**
+         * Bolt: Optimized string construction using pack and array_slice.
+         * This is much faster than iterative chr() calls and concatenation.
+         */
+        return pack('C*', ...array_slice($arr, $string_offset, $length));
     }
 
     /**
@@ -318,16 +316,20 @@ class XmlParser
     {
         $strlen = $arr[$string_offset + 1] << 8 & 0xff00 | $arr[$string_offset] & 0xff;
         $string_offset += 2;
-        $string = "";
 
         // We are dealing with Unicode strings, so each char is 2 bytes
-        $strEnd = $string_offset + ($strlen * 2);
+        $byteLength = $strlen * 2;
+
+        /**
+         * Bolt: Optimized string construction using pack and array_slice.
+         * For UTF-16LE, we still need to convert it to UTF-8 if mb_convert_encoding is available.
+         */
         if (function_exists("mb_convert_encoding")) {
-            for ($i = $string_offset; $i < $strEnd; $i++) {
-                $string .= chr($arr[$i]);
-            }
+            $string = pack('C*', ...array_slice($arr, $string_offset, $byteLength));
             $string = mb_convert_encoding($string, "UTF-8", "UTF-16LE");
-        } else {  // sonvert as ascii, skipping every second char
+        } else {  // convert as ascii, skipping every second char
+            $string = "";
+            $strEnd = $string_offset + $byteLength;
             for ($i = $string_offset; $i < $strEnd; $i += 2) {
                 $string .= chr($arr[$i]);
             }
