@@ -122,39 +122,50 @@ class ResourcesParser
 
         $strings = array();
         for ($i = 0; $i < $stringsCount; $i++) {
-            $lastPosition = $data->position();
-            $pos = $stringsStart + $offsets[$i];
-            $data->seek($pos);
-            $len = $data->position();
-            $data->seek($lastPosition);
-            if ($len < 0) {
-                $data->readInt16LE(); // extendShort
-            }
-            $pos += 2;
+            $data->seek($stringsStart + $offsets[$i]);
 
-            $strings[$i] = '';
             if ($isUtf8) {
-                $length = 0;
-                $data->seek($pos);
-                while ($data->readByte() != 0) {
-                    $length++;
-                }
-                if ($length > 0) {
-                    $data->seek($pos);
-                    $strings[$i] = $data->read($length);
-                } else {
-                    $strings[$i] = '';
-                }
+                $this->decodeLengthUTF8($data); // Skip char length
+                $byteLength = $this->decodeLengthUTF8($data);
+                $strings[$i] = $byteLength > 0 ? $data->read($byteLength) : '';
             } else {
-                $data->seek($pos);
-                while (($c = $data->read()) != 0) {
-                    $strings[$i] .= $c;
-                    $pos += 2;
-                }
+                $charLength = $this->decodeLengthUTF16($data);
+                $strings[$i] = $charLength > 0 ? \mb_convert_encoding($data->read($charLength * 2), 'UTF-8', 'UTF-16LE') : '';
             }
-            // echo 'Parsed value: ', $strings[$i], PHP_EOL;
         }
         return $strings;
+    }
+
+    /**
+     * Bolt: Optimized length-prefix decoding for UTF-8 string pools.
+     *
+     * @param SeekableStream $stream
+     * @return int
+     */
+    private function decodeLengthUTF8(SeekableStream $stream)
+    {
+        $len = $stream->readByte();
+        if (($len & 0x80) != 0) {
+            $len = (($len & 0x7F) << 8) | $stream->readByte();
+        }
+        return $len;
+    }
+
+    /**
+     * Bolt: Optimized length-prefix decoding for UTF-16 string pools.
+     *
+     * @param SeekableStream $stream
+     * @return int
+     */
+    private function decodeLengthUTF16(SeekableStream $stream)
+    {
+        $data = $stream->read(2);
+        $val = \unpack('v', $data)[1];
+        if (($val & 0x8000) != 0) {
+            $data = $stream->read(2);
+            $val = (($val & 0x7FFF) << 16) | \unpack('v', $data)[1];
+        }
+        return $val;
     }
 
     /**
