@@ -120,18 +120,27 @@ class Stream
     /**
      * Write the stream to the given destionation directly without using extra memory like storing in an array etc.
      *
-     * @param mixed $destination file path.
+     * @param mixed $destination file path or resource.
      * @throws \Exception
      */
     public function save($destination)
     {
-        $destination = new Stream(is_resource($destination) ? $destination : fopen($destination, 'w+'));
-        while (!$this->feof()) {
-            $destination->write($this->read());
+        $opened = false;
+        if (!is_resource($destination)) {
+            $destResource = \fopen($destination, 'w+');
+            $opened = true;
+        } else {
+            $destResource = $destination;
         }
 
-        if (!is_resource($destination)) { // close the file if we opened it otwhise dont touch.
-            $destination->close();
+        /**
+         * Bolt: Optimized iterative read/write loop with stream_copy_to_stream.
+         * This provides a massive performance boost for large file saves.
+         */
+        \stream_copy_to_stream($this->stream, $destResource);
+
+        if ($opened) {
+            \fclose($destResource);
         }
     }
 
