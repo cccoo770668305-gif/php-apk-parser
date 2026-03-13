@@ -47,25 +47,19 @@ class SeekableStream
      */
     private static function toMemoryStream($stream, $length = 0)
     {
-        $size = 0;
         $memoryStream = \fopen('php://memory', 'wb+');
 
-        while (!\feof($stream)) {
-            $buf = \fread($stream, 128);
-            $bufSize = \strlen($buf);
-            $size += $bufSize;
-
-            if ($length > 0 && $size >= $length) {
-                $over = $size - $length;
-                \fputs($memoryStream, \substr($buf, 0, $bufSize - $over));
-
-                if ($over > 0) {
-                    \fseek($stream, -$over, SEEK_CUR);
-                }
-                break;
-            }
-            \fputs($memoryStream, $buf);
+        /**
+         * Bolt: Optimized iterative fread loop with stream_copy_to_stream.
+         * stream_copy_to_stream is more efficient and handles the $length
+         * constraint natively without manual seeking.
+         */
+        if ($length > 0) {
+            \stream_copy_to_stream($stream, $memoryStream, $length);
+        } else {
+            \stream_copy_to_stream($stream, $memoryStream);
         }
+
         return $memoryStream;
     }
 
