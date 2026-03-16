@@ -125,13 +125,16 @@ class Stream
      */
     public function save($destination)
     {
-        $destination = new Stream(is_resource($destination) ? $destination : fopen($destination, 'w+'));
-        while (!$this->feof()) {
-            $destination->write($this->read());
-        }
+        $isResource = \is_resource($destination);
+        $destResource = $isResource ? $destination : \fopen($destination, 'w+');
 
-        if (!is_resource($destination)) { // close the file if we opened it otwhise dont touch.
-            $destination->close();
+        /* Bolt: Optimized stream-to-stream copy using stream_copy_to_stream.
+         * This bypasses the slow byte-by-byte loop and provides massive performance gains.
+         */
+        \stream_copy_to_stream($this->stream, $destResource);
+
+        if (!$isResource) {
+            \fclose($destResource);
         }
     }
 
