@@ -122,37 +122,33 @@ class ResourcesParser
 
         $strings = array();
         for ($i = 0; $i < $stringsCount; $i++) {
-            $lastPosition = $data->position();
-            $pos = $stringsStart + $offsets[$i];
-            $data->seek($pos);
-            $len = $data->position();
-            $data->seek($lastPosition);
-            if ($len < 0) {
-                $data->readInt16LE(); // extendShort
-            }
-            $pos += 2;
+            $data->seek($stringsStart + $offsets[$i]);
 
-            $strings[$i] = '';
             if ($isUtf8) {
-                $length = 0;
-                $data->seek($pos);
-                while ($data->readByte() != 0) {
-                    $length++;
+                // UTF-8 strings have two length prefixes:
+                // 1. The number of UTF-16 characters
+                // 2. The number of UTF-8 bytes
+                $u16len = $data->readByte();
+                if (($u16len & 0x80) != 0) {
+                    $u16len = (($u16len & 0x7F) << 8) | $data->readByte();
                 }
-                if ($length > 0) {
-                    $data->seek($pos);
-                    $strings[$i] = $data->read($length);
-                } else {
-                    $strings[$i] = '';
+
+                $u8len = $data->readByte();
+                if (($u8len & 0x80) != 0) {
+                    $u8len = (($u8len & 0x7F) << 8) | $data->readByte();
                 }
+
+                $strings[$i] = $u8len > 0 ? $data->read($u8len) : '';
             } else {
-                $data->seek($pos);
-                while (($c = $data->read()) != 0) {
-                    $strings[$i] .= $c;
-                    $pos += 2;
+                // UTF-16 strings have one length prefix:
+                // 1. The number of UTF-16 characters (2 bytes each)
+                $u16len = $data->readInt16LE();
+                if (($u16len & 0x8000) != 0) {
+                    $u16len = (($u16len & 0x7FFF) << 16) | $data->readInt16LE();
                 }
+
+                $strings[$i] = $u16len > 0 ? \mb_convert_encoding($data->read($u16len * 2), 'UTF-8', 'UTF-16LE') : '';
             }
-            // echo 'Parsed value: ', $strings[$i], PHP_EOL;
         }
         return $strings;
     }
