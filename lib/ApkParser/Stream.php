@@ -17,7 +17,7 @@ class Stream
      *
      * @var resource
      */
-    private $stream;
+    public $stream;
 
     /**
      * @param resource $stream File stream.
@@ -125,13 +125,14 @@ class Stream
      */
     public function save($destination)
     {
-        $destination = new Stream(is_resource($destination) ? $destination : fopen($destination, 'w+'));
-        while (!$this->feof()) {
-            $destination->write($this->read());
-        }
+        $isResource = \is_resource($destination);
+        $destStream = new Stream($isResource ? $destination : \fopen($destination, 'w+'));
 
-        if (!is_resource($destination)) { // close the file if we opened it otwhise dont touch.
-            $destination->close();
+        /* Bolt: Optimized high-throughput copying using stream_copy_to_stream */
+        \stream_copy_to_stream($this->stream, $destStream->stream);
+
+        if (!$isResource) { // close the file if we opened it otherwise don't touch.
+            $destStream->close();
         }
     }
 
